@@ -188,47 +188,57 @@ Các quy tắc dưới đây chưa được xác định cụ thể trong yêu c
 | **BR-04** | **Luồng tìm kiếm tài xế thay thế (Re-routing)** | Trong trường hợp tài xế được hệ thống chỉ định từ chối chuyến hoặc không phản hồi quá thời gian quy định (ví dụ 15-30 giây), hệ thống phải tự động lặp lại quá trình phân công cho tài xế gần thứ hai. Khách hàng chỉ thấy trạng thái "Đang tìm tài xế" và không phải thao tác đặt lại. |
 | **BR-05** | **Thông báo hết xe (No Driver Available)** | Nếu hệ thống đã mở rộng bán kính tìm kiếm tối đa (theo quy định của doanh nghiệp) mà vẫn không có tài xế nào tiếp nhận, hệ thống phải thông báo rõ ràng cho khách hàng: "Hiện tại không có tài xế phù hợp, vui lòng thử lại sau" và kết thúc yêu cầu để giải phóng luồng xử lý. |
 
-**Quy trình 1: Lựa chọn phương tiện và tạo cuốc xe (Ánh xạ từ BR-01)**
-* **Tác nhân tham gia:** Khách hàng, Hệ thống.
-* **Luồng thực thi chính:**
-  1. Khách hàng mở ứng dụng, nhập địa chỉ "Điểm đón" và "Điểm đến".
-  2. Hệ thống tải và hiển thị danh sách các loại phương tiện cơ bản khả dụng (CAB 4 chỗ, CAB 7 chỗ, CAB Moto) cùng mức giá dự kiến.
-  3. Khách hàng bấm chọn loại xe phù hợp với nhu cầu.
-  4. Khách hàng bấm "Xác nhận đặt xe".
-  5. Hệ thống ghi nhận yêu cầu và chuyển sang trạng thái "Đang tìm tài xế".
+**Mô hình hóa quy trình nghiệp vụ (Business Process Model) - Luồng Đặt xe MVP**
 
-**Quy trình 2: Tự động quét và chỉ định tài xế (Ánh xạ từ BR-02)**
-* **Tác nhân tham gia:** Hệ thống, Tài xế.
-* **Luồng thực thi chính:**
-  1. Nhận yêu cầu đặt xe từ Quy trình 1, hệ thống lấy tọa độ điểm đón của khách hàng.
-  2. Hệ thống quét danh sách các tài xế đang bật trạng thái "Sẵn sàng" và có loại xe khớp với yêu cầu.
-  3. Hệ thống tính toán khoảng cách và lọc ra tài xế có vị trí địa lý gần điểm đón nhất.
-  4. Hệ thống đẩy thông báo "Yêu cầu cuốc xe mới" tới màn hình ứng dụng của tài xế được chọn.
-  5. Đồng hồ đếm ngược (ví dụ 15 giây) bắt đầu kích hoạt để chờ phản hồi từ tài xế.
+**1. Bảng mô tả luồng quy trình (Process Flow Description)**
 
-**Quy trình 3: Cung cấp thông tin nhận diện khi ghép nối thành công (Ánh xạ từ BR-03)**
-* **Tác nhân tham gia:** Tài xế, Hệ thống, Khách hàng.
-* **Luồng thực thi chính:**
-  1. Tài xế bấm "Chấp nhận" cuốc xe trên ứng dụng.
-  2. Hệ thống ghi nhận trạng thái ghép nối thành công.
-  3. Hệ thống trích xuất dữ liệu của tài xế vừa nhận chuyến (Tên, Số điện thoại, Biển số xe, Loại xe, Tọa độ GPS hiện tại).
-  4. Hệ thống gửi và hiển thị các thông tin này lên giao diện theo dõi hành trình của khách hàng.
-  5. Cập nhật trạng thái chuyến đi thành "Tài xế đang đến".
+| Bước | Tác nhân | Thao tác / Xử lý | Mã BR đối chiếu |
+| :--- | :--- | :--- | :--- |
+| 1 | Khách hàng | Nhập điểm đón, điểm đến và lựa chọn loại phương tiện (4 chỗ, 7 chỗ...). | BR-01 |
+| 2 | Hệ thống | Tính toán cước phí dự kiến dựa trên quãng đường và hiển thị cho khách hàng. | |
+| 3 | Khách hàng | Xác nhận "Đặt xe". | |
+| 4 | Hệ thống | Chuyển trạng thái "Đang tìm tài xế". Quét tọa độ GPS, xác định tài xế Online gần nhất phù hợp với loại xe. | BR-02 |
+| 5 | Hệ thống | Gửi thông báo yêu cầu nhận chuyến đến Ứng dụng của Tài xế được chọn. | BR-02 |
+| 6 | Tài xế | Nhận thông báo và có khoảng thời gian giới hạn (VD: 15s) để "Chấp nhận" hoặc "Từ chối". | |
+| 7a | Hệ thống | **Ngoại lệ (Từ chối/Timeout):** Tự động bỏ qua tài xế hiện tại, lặp lại Bước 4 để tìm tài xế gần thứ 2. | BR-04 |
+| 7b | Hệ thống | **Ngoại lệ (Hết xe):** Nếu vượt quá số lần quét hoặc giới hạn bán kính, gửi thông báo "Không có tài xế" cho khách và kết thúc luồng. | BR-05 |
+| 8 | Hệ thống | **Luồng chính (Chấp nhận):** Khóa cuốc xe cho tài xế này. Gửi thông tin định danh (Tên, SĐT, Biển số, Loại xe) và vị trí tài xế sang cho Khách hàng. | BR-03 |
+| 9 | Tài xế | Di chuyển đến điểm đón. Bấm xác nhận "Đã đến điểm đón" trên ứng dụng. | |
+| 10 | Tài xế | Khách lên xe. Bấm xác nhận "Bắt đầu chuyến đi". | |
+| 11 | Tài xế | Đến điểm trả khách. Bấm xác nhận "Hoàn thành chuyến đi". | |
+| 12 | Hệ thống | Ghi nhận trạng thái hoàn thành. Hiển thị tổng tiền cần thanh toán cho cả Khách hàng và Tài xế để thực hiện giao dịch (tiền mặt/chuyển khoản). | |
 
-**Quy trình 4: Tìm kiếm tài xế thay thế do từ chối/quá hạn (Ánh xạ từ BR-04)**
-* **Tác nhân tham gia:** Hệ thống, Tài xế.
-* **Luồng thực thi chính:**
-  1. Tài xế được chỉ định bấm "Từ chối" hoặc đồng hồ đếm ngược (15 giây) kết thúc mà không có phản hồi.
-  2. Hệ thống thu hồi yêu cầu cuốc xe trên máy của tài xế hiện tại.
-  3. Hệ thống tự động loại tài xế này khỏi danh sách quét của cuốc xe hiện tại.
-  4. Hệ thống quay lại Quy trình 2, tiếp tục tìm tài xế có vị trí gần thứ hai để gửi yêu cầu.
-  5. Màn hình của khách hàng vẫn giữ nguyên trạng thái "Đang tìm tài xế" (không bị ngắt quãng).
+---
 
-**Quy trình 5: Xử lý ngoại lệ hết tài xế khả dụng (Ánh xạ từ BR-05)**
-* **Tác nhân tham gia:** Hệ thống, Khách hàng.
-* **Luồng thực thi chính:**
-  1. Hệ thống thực hiện lặp lại Quy trình 4 nhưng đã đạt đến giới hạn (ví dụ: mở rộng bán kính đến 5km hoặc đã hỏi toàn bộ tài xế trống trong khu vực).
-  2. Không có bất kỳ tài xế nào tiếp nhận cuốc xe.
-  3. Hệ thống tự động đóng yêu cầu đặt xe hiện tại để giải phóng tài nguyên.
-  4. Hệ thống gửi thông báo pop-up cho khách hàng: "Hiện tại không có tài xế phù hợp, vui lòng thử lại sau".
-  5. Đưa màn hình khách hàng về lại trạng thái trang chủ ban đầu.
+**2. Sơ đồ luồng nghiệp vụ (BPMN / Flowchart bằng Mermaid)**
+
+```mermaid
+flowchart TD
+    %% Tác nhân: Khách hàng (C), Hệ thống (S), Tài xế (D)
+    Start([Khách hàng mở App]) --> C1(Nhập điểm đón, điểm đến)
+    C1 --> C2(Chọn loại xe - BR-01)
+    C2 --> S1(Hệ thống tính và hiển thị giá)
+    S1 --> C3{Khách bấm Đặt xe?}
+    C3 -- Hủy --> End1([Kết thúc])
+    C3 -- Xác nhận --> S2(Hệ thống quét tài xế gần nhất - BR-02)
+    
+    S2 --> S3(Phát cuốc cho Tài xế 1)
+    S3 --> D1{Tài xế phản hồi?}
+    
+    D1 -- Từ chối / Quá giờ --> S4{Còn tài xế trong bán kính?}
+    S4 -- Còn --> S2_loop(Hệ thống quét tài xế gần thứ N - BR-04)
+    S2_loop --> S3
+    S4 -- Không còn --> S5(Thông báo hết xe - BR-05)
+    S5 --> End2([Hủy cuốc tự động])
+    
+    D1 -- Chấp nhận --> S6(Ghép nối thành công. Hiển thị thông tin TX - BR-03)
+    S6 --> D2(Tài xế di chuyển đến điểm đón)
+    D2 --> D3(Tài xế xác nhận: Đã đến)
+    D3 --> D4(Tài xế xác nhận: Bắt đầu chuyến)
+    D4 --> D5(Tài xế xác nhận: Hoàn thành chuyến)
+    D5 --> S7(Hệ thống ghi nhận hoàn thành & Tính cước cuối)
+    S7 --> End3([Thanh toán & Kết thúc])
+    
+    %% Style
+    classDef system fill:#f9f,stroke:#333,stroke-width:2px;
+    class S1,S2,S2_loop,S3,S4,S5,S6,S7 system;
