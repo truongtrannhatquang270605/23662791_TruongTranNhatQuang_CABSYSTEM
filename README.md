@@ -1,4 +1,6 @@
 # 23662791_TruongTranNhatQuang_CABSYSTEM
+**Danh sách Stakeholders (Các bên liên quan) - Nền tảng đặt xe CAB**
+
 | Tên | Vai trò |
 | :--- | :--- |
 | **Ban lãnh đạo / Ban giám đốc** | Người ra quyết định chiến lược và đầu tư nền tảng. Có nhu cầu xem các báo cáo tổng quan (doanh thu, số lượng chuyến, tỷ lệ hoàn thành/hủy, hiệu suất) và định hướng mở rộng hệ thống trong tương lai. |
