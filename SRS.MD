@@ -242,3 +242,45 @@ flowchart TD
     %% Style
     classDef system fill:#f9f,stroke:#333,stroke-width:2px;
     class S1,S2,S2_loop,S3,S4,S5,S6,S7 system;
+
+# Tài liệu Phân tích Nghiệp vụ (BA) - Nền tảng Đặt xe CAB (Giai đoạn MVP)
+
+## 1. Danh sách Stakeholders (Các bên liên quan)
+
+| Tên | Vai trò |
+| :--- | :--- |
+| **Ban lãnh đạo / Ban giám đốc** | Người ra quyết định chiến lược và đầu tư nền tảng. Có nhu cầu xem báo cáo tổng quan và định hướng mở rộng hệ thống. |
+| **Khách hàng** | Người dùng cuối sử dụng hệ thống để tạo yêu cầu đặt xe, theo dõi hành trình và thanh toán cước phí. |
+| **Tài xế** | Đối tác cung cấp dịch vụ vận chuyển. Sử dụng ứng dụng để nhận yêu cầu đặt xe, cập nhật trạng thái chuyến đi và chia sẻ vị trí. |
+| **Nhân viên vận hành** | Quản lý dữ liệu hệ thống (khách hàng, tài xế, phương tiện). Giám sát các chuyến đi đang diễn ra và hỗ trợ xử lý ngoại lệ. |
+| **Business Analyst (BA)** | Người phân tích và thiết kế hệ thống. Chịu trách nhiệm xác định phạm vi, quy trình nghiệp vụ và các yêu cầu chức năng/phi chức năng. |
+| **Nhóm phát triển (Dev Team)** | Chịu trách nhiệm thiết kế kiến trúc kỹ thuật và lập trình xây dựng nền tảng CAB dựa trên các yêu cầu đã phân tích. |
+| **Cổng thanh toán (Bên thứ 3)** | Đối tác xử lý các giao dịch thanh toán điện tử, đảm bảo tính bảo mật. |
+| **Dịch vụ thông báo (Bên thứ 3)** | Hệ thống bên ngoài hỗ trợ gửi các cập nhật thời gian thực tới thiết bị của khách hàng và tài xế. |
+
+---
+
+## 2. Ma trận Stakeholder (Power/Interest Grid)
+
+| | Mức độ quan tâm thấp (Low Interest) | Mức độ quan tâm cao (High Interest) |
+| :--- | :--- | :--- |
+| **Quyền lực cao<br>(High Power)** | **Giữ hài lòng (Keep Satisfied)**<br>• Cổng thanh toán<br>• Dịch vụ thông báo | **Quản lý chặt chẽ (Manage Closely)**<br>• Ban lãnh đạo / Ban giám đốc<br>• Nhóm phát triển (Dev Team)<br>• Business Analyst (BA) |
+| **Quyền lực thấp<br>(Low Power)** | **Theo dõi (Monitor)**<br>*(Chưa có đối tượng nổi bật)* | **Cung cấp thông tin (Keep Informed)**<br>• Khách hàng<br>• Tài xế<br>• Nhân viên vận hành |
+
+```mermaid
+quadrantChart
+    title Ma trận Stakeholder (Power/Interest) - Nền tảng CAB
+    x-axis Mức độ quan tâm thấp --> Mức độ quan tâm cao
+    y-axis Quyền lực thấp --> Quyền lực cao
+    quadrant-1 Quản lý chặt chẽ
+    quadrant-2 Giữ hài lòng
+    quadrant-3 Theo dõi
+    quadrant-4 Cung cấp thông tin
+    Ban lãnh đạo: [0.85, 0.90]
+    Business Analyst: [0.80, 0.80]
+    Nhóm phát triển: [0.90, 0.75]
+    Cổng thanh toán: [0.25, 0.85]
+    Dịch vụ thông báo: [0.35, 0.75]
+    Khách hàng: [0.90, 0.30]
+    Tài xế: [0.85, 0.20]
+    Nhân viên vận hành: [0.70, 0.35]
