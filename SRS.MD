@@ -187,3 +187,48 @@ Các quy tắc dưới đây chưa được xác định cụ thể trong yêu c
 | **BR-03** | **Cung cấp thông tin nhận diện (Driver/Vehicle Info)** | Khi hệ thống ghép nối thành công, màn hình ứng dụng của khách hàng chỉ hiển thị các thông tin định danh bắt buộc để nhận xe: Tên tài xế, Số điện thoại (để liên lạc), Biển số xe, Loại xe và Vị trí hiện tại trên bản đồ. Các thông tin về điểm đánh giá (Rating) hay số chuyến đã hoàn thành bị loại bỏ khỏi MVP. |
 | **BR-04** | **Luồng tìm kiếm tài xế thay thế (Re-routing)** | Trong trường hợp tài xế được hệ thống chỉ định từ chối chuyến hoặc không phản hồi quá thời gian quy định (ví dụ 15-30 giây), hệ thống phải tự động lặp lại quá trình phân công cho tài xế gần thứ hai. Khách hàng chỉ thấy trạng thái "Đang tìm tài xế" và không phải thao tác đặt lại. |
 | **BR-05** | **Thông báo hết xe (No Driver Available)** | Nếu hệ thống đã mở rộng bán kính tìm kiếm tối đa (theo quy định của doanh nghiệp) mà vẫn không có tài xế nào tiếp nhận, hệ thống phải thông báo rõ ràng cho khách hàng: "Hiện tại không có tài xế phù hợp, vui lòng thử lại sau" và kết thúc yêu cầu để giải phóng luồng xử lý. |
+
+**Quy trình 1: Lựa chọn phương tiện và tạo cuốc xe (Ánh xạ từ BR-01)**
+* **Tác nhân tham gia:** Khách hàng, Hệ thống.
+* **Luồng thực thi chính:**
+  1. Khách hàng mở ứng dụng, nhập địa chỉ "Điểm đón" và "Điểm đến".
+  2. Hệ thống tải và hiển thị danh sách các loại phương tiện cơ bản khả dụng (CAB 4 chỗ, CAB 7 chỗ, CAB Moto) cùng mức giá dự kiến.
+  3. Khách hàng bấm chọn loại xe phù hợp với nhu cầu.
+  4. Khách hàng bấm "Xác nhận đặt xe".
+  5. Hệ thống ghi nhận yêu cầu và chuyển sang trạng thái "Đang tìm tài xế".
+
+**Quy trình 2: Tự động quét và chỉ định tài xế (Ánh xạ từ BR-02)**
+* **Tác nhân tham gia:** Hệ thống, Tài xế.
+* **Luồng thực thi chính:**
+  1. Nhận yêu cầu đặt xe từ Quy trình 1, hệ thống lấy tọa độ điểm đón của khách hàng.
+  2. Hệ thống quét danh sách các tài xế đang bật trạng thái "Sẵn sàng" và có loại xe khớp với yêu cầu.
+  3. Hệ thống tính toán khoảng cách và lọc ra tài xế có vị trí địa lý gần điểm đón nhất.
+  4. Hệ thống đẩy thông báo "Yêu cầu cuốc xe mới" tới màn hình ứng dụng của tài xế được chọn.
+  5. Đồng hồ đếm ngược (ví dụ 15 giây) bắt đầu kích hoạt để chờ phản hồi từ tài xế.
+
+**Quy trình 3: Cung cấp thông tin nhận diện khi ghép nối thành công (Ánh xạ từ BR-03)**
+* **Tác nhân tham gia:** Tài xế, Hệ thống, Khách hàng.
+* **Luồng thực thi chính:**
+  1. Tài xế bấm "Chấp nhận" cuốc xe trên ứng dụng.
+  2. Hệ thống ghi nhận trạng thái ghép nối thành công.
+  3. Hệ thống trích xuất dữ liệu của tài xế vừa nhận chuyến (Tên, Số điện thoại, Biển số xe, Loại xe, Tọa độ GPS hiện tại).
+  4. Hệ thống gửi và hiển thị các thông tin này lên giao diện theo dõi hành trình của khách hàng.
+  5. Cập nhật trạng thái chuyến đi thành "Tài xế đang đến".
+
+**Quy trình 4: Tìm kiếm tài xế thay thế do từ chối/quá hạn (Ánh xạ từ BR-04)**
+* **Tác nhân tham gia:** Hệ thống, Tài xế.
+* **Luồng thực thi chính:**
+  1. Tài xế được chỉ định bấm "Từ chối" hoặc đồng hồ đếm ngược (15 giây) kết thúc mà không có phản hồi.
+  2. Hệ thống thu hồi yêu cầu cuốc xe trên máy của tài xế hiện tại.
+  3. Hệ thống tự động loại tài xế này khỏi danh sách quét của cuốc xe hiện tại.
+  4. Hệ thống quay lại Quy trình 2, tiếp tục tìm tài xế có vị trí gần thứ hai để gửi yêu cầu.
+  5. Màn hình của khách hàng vẫn giữ nguyên trạng thái "Đang tìm tài xế" (không bị ngắt quãng).
+
+**Quy trình 5: Xử lý ngoại lệ hết tài xế khả dụng (Ánh xạ từ BR-05)**
+* **Tác nhân tham gia:** Hệ thống, Khách hàng.
+* **Luồng thực thi chính:**
+  1. Hệ thống thực hiện lặp lại Quy trình 4 nhưng đã đạt đến giới hạn (ví dụ: mở rộng bán kính đến 5km hoặc đã hỏi toàn bộ tài xế trống trong khu vực).
+  2. Không có bất kỳ tài xế nào tiếp nhận cuốc xe.
+  3. Hệ thống tự động đóng yêu cầu đặt xe hiện tại để giải phóng tài nguyên.
+  4. Hệ thống gửi thông báo pop-up cho khách hàng: "Hiện tại không có tài xế phù hợp, vui lòng thử lại sau".
+  5. Đưa màn hình khách hàng về lại trạng thái trang chủ ban đầu.
