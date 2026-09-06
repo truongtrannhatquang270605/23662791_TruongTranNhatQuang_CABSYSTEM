@@ -168,3 +168,12 @@ Các quy tắc dưới đây chưa được xác định cụ thể trong yêu c
 * **Thuật toán phân công (Dispatching) cơ bản:** Sử dụng cơ chế tìm kiếm theo bán kính địa lý gần nhất (ví dụ: quét các tài xế trống trong bán kính 2km) hoặc cơ chế Broadcast (phát đồng loạt). Bỏ qua hoàn toàn các tham số ưu tiên về tỷ lệ nhận chuyến, điểm đánh giá hay thâm niên.
 * **Thực thi chuyến đi:** Giao diện thao tác một chạm để tài xế cập nhật luồng trạng thái: Chấp nhận chuyến $\rightarrow$ Đã đến điểm đón $\rightarrow$ Bắt đầu hành trình $\rightarrow$ Kết thúc chuyến.
 * **Ngoài phạm vi MVP (Out of scope):** Điểm đánh giá (Rating), hệ thống thưởng/phạt (Penalty), ví nội bộ phức tạp, xem thống kê hiệu suất tài xế.
+
+**Danh sách Yêu cầu Nghiệp vụ (Business Requirements) - Lựa chọn Xe & Tài xế (MVP)**
+
+| Mã BR | Hạng mục | Mô tả yêu cầu cho giai đoạn MVP |
+| :--- | :--- | :--- |
+| **BR-01** | **Lựa chọn loại phương tiện cơ bản** | Khách hàng chỉ được cung cấp các tùy chọn phân loại xe thiết yếu nhất để đáp ứng nhu cầu vận chuyển (ví dụ: Xe 4 chỗ tiêu chuẩn, Xe 7 chỗ tiêu chuẩn). Hệ thống không xử lý các bộ lọc phức tạp (xe hạng sang, xe điện, xe ghép) nhằm đơn giản hóa công thức tính cước và logic tìm kiếm. |
+| **BR-02** | **Cơ chế ghép nối tài xế tự động** | Để đảm bảo hệ thống vận hành trơn tru và nhanh chóng, khách hàng không tự lướt danh sách để chọn tài xế. Hệ thống sẽ tự động quét và chỉ định tài xế đang ở trạng thái "Sẵn sàng" có vị trí địa lý gần điểm đón nhất. |
+| **BR-03** | **Hiển thị thông tin tài xế rút gọn** | Sau khi hệ thống ghép nối thành công, giao diện khách hàng chỉ hiển thị các thông tin định danh bắt buộc: Tên tài xế, số điện thoại, biển số xe và vị trí GPS trên bản đồ. Không thu thập, không tính toán và không hiển thị các dữ liệu đánh giá chất lượng (Rating, thâm niên, số huy hiệu). |
+| **BR-04** | **Tự động xử lý luồng từ chối chuyến** | Nếu tài xế được hệ thống lựa chọn từ chối yêu cầu hoặc không phản hồi trong thời gian quy định (ví dụ: 15 giây), hệ thống tự động chuyển yêu cầu đặt xe tới tài xế gần thứ hai. Khách hàng không cần thao tác chọn lại xe hay tạo lại cuốc xe từ đầu. |
