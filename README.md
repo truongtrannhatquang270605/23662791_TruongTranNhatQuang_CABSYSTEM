@@ -25,3 +25,24 @@
 * **Giữ hài lòng (High Power - Low Interest):** Các đối tác cung cấp API (thanh toán, thông báo) không quan tâm nhiều đến chiến lược kinh doanh của CAB, nhưng hệ thống phụ thuộc hoàn toàn vào dịch vụ của họ. Cần tuân thủ đúng tài liệu kỹ thuật (guidelines) của họ và duy trì kết nối ổn định.
 * **Cung cấp thông tin (Low Power - High Interest):** Khách hàng, tài xế và nhân viên vận hành bị ảnh hưởng trực tiếp bởi hệ thống mới nhưng không có quyền quyết định tính năng. Cần thu thập ý kiến, đào tạo sử dụng và cập nhật thông báo rõ ràng cho họ khi hệ thống ra mắt.
 * **Theo dõi (Low Power - Low Interest):** Giám sát tối thiểu. Trong tương lai có thể là các cơ quan quản lý giao thông địa phương nếu họ yêu cầu báo cáo định kỳ nhưng chưa có tác động trực tiếp ở giai đoạn hiện tại.
+
+* **Biểu đồ Ma trận Stakeholder (Mermaid Quadrant Chart)**
+
+```mermaid
+quadrantChart
+    title Ma trận Stakeholder (Power/Interest) - Nền tảng CAB
+    x-axis Mức độ quan tâm thấp --> Mức độ quan tâm cao
+    y-axis Quyền lực thấp --> Quyền lực cao
+    quadrant-1 Quản lý chặt chẽ
+    quadrant-2 Giữ hài lòng
+    quadrant-3 Theo dõi
+    quadrant-4 Cung cấp thông tin
+    Ban lãnh đạo: [0.85, 0.90]
+    Business Analyst (BA): [0.80, 0.80]
+    Nhóm phát triển (Dev): [0.90, 0.75]
+    Cổng thanh toán: [0.25, 0.85]
+    Dịch vụ thông báo: [0.35, 0.75]
+    Khách hàng: [0.90, 0.30]
+    Tài xế: [0.85, 0.20]
+    Nhân viên vận hành: [0.70, 0.35]    
+```
