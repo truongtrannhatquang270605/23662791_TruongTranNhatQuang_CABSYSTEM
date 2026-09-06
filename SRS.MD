@@ -45,3 +45,15 @@ quadrantChart
     Tài xế: [0.85, 0.20]
     Nhân viên vận hành: [0.70, 0.35]
 ```
+
+**Danh sách Mục tiêu nghiệp vụ (Business Requirements - BR)**
+
+| Mã BR | Mục tiêu nghiệp vụ | Mô tả chi tiết |
+| :--- | :--- | :--- |
+| **BR-01** | **Tự động hóa điều phối và phân công** | Thay thế quy trình thủ công bằng thuật toán tìm kiếm, ưu tiên và phân công tài xế tự động (dựa trên vị trí, trạng thái). Tự động tìm tài xế thay thế nếu bị từ chối mà không cần khách tạo lại yêu cầu. |
+| **BR-02** | **Quản lý cước phí và thanh toán tập trung** | Tự động tính toán cước phí sau chuyến đi. Tích hợp thanh toán điện tử qua bên thứ ba an toàn (không lưu dữ liệu thẻ trực tiếp trên hệ thống CAB) và hỗ trợ xử lý khi giao dịch thất bại. |
+| **BR-03** | **Minh bạch hóa thông tin và hành trình** | Cung cấp thông tin thời gian thực cho khách hàng về vị trí tài xế, thời gian đến dự kiến, trạng thái chuyến đi và lịch sử giao dịch thông qua hệ thống thông báo đa kênh. |
+| **BR-04** | **Tối ưu hóa quản trị vận hành** | Cung cấp giao diện quản trị phân quyền cho nhân viên vận hành để giám sát chuyến đi, xử lý ngoại lệ, quản lý hồ sơ (khách hàng, tài xế, xe) và xuất báo cáo hiệu suất (doanh thu, tỷ lệ hủy, số chuyến). |
+| **BR-05** | **Đảm bảo tính linh hoạt và khả năng mở rộng** | Xây dựng kiến trúc hệ thống cho phép dễ dàng bổ sung loại dịch vụ mới, thêm cổng thanh toán hoặc nhà cung cấp thông báo trong tương lai mà không phải đập đi xây lại. |
+| **BR-06** | **Đảm bảo hiệu suất và tính sẵn sàng cao** | Hệ thống phải hoạt động ổn định khi nhu cầu tăng cao. Các thành phần (ví dụ: thanh toán, thông báo) phải độc lập; lỗi ở một module không được làm gián đoạn toàn bộ hệ thống đặt xe. |
+| **BR-07** | **Đảm bảo an toàn thông tin và bảo mật** | Yêu cầu xác thực tài khoản chặt chẽ, bảo vệ dữ liệu cá nhân, dữ liệu vị trí và giao dịch. Lưu vết (log) các thao tác quan trọng trên hệ thống để phục vụ kiểm tra khi có sự cố. |
