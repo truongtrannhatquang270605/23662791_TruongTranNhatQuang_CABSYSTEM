@@ -369,3 +369,278 @@ Dựa trên bối cảnh và định hướng phát triển của doanh nghiệp
 ## 4. Khả năng bảo trì và Triển khai (Maintainability & Deployability)
 * **NFR-09 (Triển khai từng phần):** Hệ thống phải cho phép nhóm phát triển cập nhật hoặc vá lỗi từng module riêng biệt (như module khách hàng hoặc module tài xế) mà không bắt buộc phải dừng toàn bộ hệ thống (Zero-downtime deployment cho các bản cập nhật nhỏ).
 * **NFR-10 (Lưu trữ Nhật ký hệ thống - Logging):** Hệ thống phải ghi lại toàn bộ các sự kiện lỗi quan trọng (Error logs), lịch sử trạng thái chuyến đi và lịch sử phản hồi của tài xế trong cơ sở dữ liệu để phục vụ công tác tra cứu, giải quyết tranh chấp khi có sự cố phát sinh.
+
+# Thiết kế Mô hình Thực thể Kết hợp (Entity Relationship Diagram - ERD) - Giai đoạn MVP
+
+Dựa trên các Quy tắc Nghiệp vụ (BR) và Yêu cầu Chức năng (FR) đã xác định ở các phần trước cho nền tảng CAB (phiên bản MVP gồm Quản lý Khách hàng và Quản lý Tài xế), dưới đây là mô hình ERD với các thực thể cốt lõi, thuộc tính và mối quan hệ giữa chúng.
+
+## 1. Danh sách các Thực thể (Entities) và Thuộc tính
+
+### 1. Thực thể `Customer` (Khách hàng)
+Lưu trữ thông tin định danh tối thiểu của khách hàng sử dụng dịch vụ.
+*   `customer_id` (PK): Mã định danh khách hàng (UUID / Long).
+*   `phone_number`: Số điện thoại khách hàng (Dùng để xác thực OTP).
+*   `status`: Trạng thái tài khoản (Active, Blocked).
+*   `created_at`: Thời điểm đăng ký tài khoản.
+
+### 2. Thực thể `Driver` (Tài xế)
+Lưu trữ thông tin hồ sơ và trạng thái hoạt động của đối tác tài xế.
+*   `driver_id` (PK): Mã định danh tài xế.
+*   `phone_number`: Số điện thoại tài xế (Dùng để nhận OTP và liên lạc).
+*   `name`: Tên tài xế.
+*   `online_status`: Trạng thái làm việc hiện tại (Online / Offline) (Liên quan FR-D01).
+*   `current_latitude`: Vĩ độ GPS hiện tại của tài xế (Cập nhật realtime).
+*   `current_longitude`: Kinh độ GPS hiện tại của tài xế (Cập nhật realtime).
+*   `status`: Trạng thái tài khoản được duyệt bởi nhân viên vận hành (Pending, Active, Locked).
+
+### 3. Thực thể `Vehicle` (Phương tiện)
+Lưu trữ thông tin xe của tài xế phục vụ cho việc phân loại chuyến đi.
+*   `vehicle_id` (PK): Mã định danh phương tiện.
+*   `driver_id` (FK): Khóa ngoại liên kết tới tài xế sở hữu.
+*   `vehicle_type`: Loại phương tiện cơ bản theo BR-01 (VD: `CAR_4_SEATS`, `CAR_7_SEATS`).
+*   `license_plate`: Biển số xe (Dùng để khách hàng nhận diện).
+
+### 4. Thực thể `Trip` (Chuyến đi / Cuốc xe)
+Thực thể trung tâm lưu trữ toàn bộ vòng đời của một yêu cầu đặt xe từ lúc tạo đến khi hoàn thành.
+*   `trip_id` (PK): Mã định danh cuốc xe.
+*   `customer_id` (FK): Khách hàng tạo yêu cầu.
+*   `driver_id` (FK, Nullable): Tài xế nhận cuốc (Có thể trống nếu chưa tìm được hoặc hủy).
+*   `pickup_latitude`: Tọa độ vĩ độ điểm đón.
+*   `pickup_longitude`: Tọa độ kinh độ điểm đón.
+*   `dropoff_latitude`: Tọa độ vĩ độ điểm đến.
+*   `dropoff_longitude`: Tọa độ kinh độ điểm đến.
+*   `vehicle_type_requested`: Loại xe khách hàng yêu cầu.
+*   `estimated_fare`: Số tiền cước phí dự kiến (Tính theo công thức tĩnh).
+*   `status`: Trạng thái chuyến đi (Values: `FINDING`, `DRIVER_ARRIVING`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`).
+*   `created_at`: Thời gian tạo yêu cầu đặt xe.
+*   `completed_at`: Thời gian kết thúc chuyến đi.
+
+---
+
+## 2. Mô tả Quan hệ giữa các Thực thể (Relationships)
+
+| Thực thể A | Mối quan hệ (Cardinality) | Thực thể B | Mô tả ý nghĩa liên kết |
+| :--- | :---: | :--- | :--- |
+| **Customer** | `1 : N` | **Trip** | Một khách hàng có thể tạo nhiều chuyến đi trong lịch sử, nhưng một chuyến đi thuộc về duy nhất một khách hàng. |
+| **Driver** | `1 : 1` | **Vehicle** | Ở giai đoạn MVP tối giản, mỗi tài xế quản lý và gắn liền với duy nhất một phương tiện hoạt động. |
+| **Driver** | `1 : N` | **Trip** | Một tài xế có thể thực hiện nhiều chuyến đi qua các thời điểm khác nhau, nhưng tại một thời điểm (một `Trip` đang chạy), chuyến đi chỉ được gán cho một tài xế duy nhất. |
+
+---
+
+## 3. Sơ đồ ERD (Biểu đồ thực thể kết hợp bằng Mermaid)
+
+```mermaid
+erDiagram
+    CUSTOMER ||--o{ TRIP : creates
+    DRIVER ||--|{ VEHICLE : owns
+    DRIVER ||--o{ TRIP : executes
+
+    CUSTOMER {
+        string customer_id PK
+        string phone_number
+        string status
+        datetime created_at
+    }
+
+    DRIVER {
+        string driver_id PK
+        string phone_number
+        string name
+        string online_status
+        float current_latitude
+        float current_longitude
+        string status
+    }
+
+    VEHICLE {
+        string vehicle_id PK
+        string driver_id FK
+        string vehicle_type
+        string license_plate
+    }
+
+    TRIP {
+        string trip_id PK
+        string customer_id FK
+        string driver_id FK
+        float pickup_latitude
+        float pickup_longitude
+        float dropoff_latitude
+        float dropoff_longitude
+        string vehicle_type_requested
+        float estimated_fare
+        string status
+        datetime created_at
+        datetime completed_at
+    }
+
+# Thiết kế Sơ đồ Use Case (Use Case Diagram & Description) - Nền tảng CAB (Giai đoạn MVP)
+
+Dựa trên phạm vi MVP đã xác định (gồm Module Khách hàng, Module Tài xế và Hệ thống trung tâm tự động hóa), dưới đây là mô hình Use Case bao gồm tác nhân, sơ đồ tổng quan và đặc tả chi tiết cho các chức năng cốt lõi.
+
+## 1. Xác định Tác nhân (Actors) và Use Case trong MVP
+
+| Tác nhân | Các Use Case chính trong MVP |
+| :--- | :--- |
+| **Khách hàng (Customer)** | • Đăng ký / Đăng nhập tài khoản (qua OTP)<br>• Nhập điểm đón / điểm đến & chọn loại xe<br>• Gửi yêu cầu đặt xe<br>• Theo dõi trạng thái & vị trí tài xế chuyến đi |
+| **Tài xế (Driver)** | • Cập nhật trạng thái hoạt động (Online / Offline)<br>• Nhận thông báo cuốc xe mới<br>• Phản hồi cuốc xe (Chấp nhận / Từ chối)<br>• Cập nhật luồng trạng thái chuyến đi (Đã đến điểm đón, Bắt đầu, Hoàn thành) |
+| **Hệ thống (System / Backend)** | • Thuật toán tự động quét và phân công tài xế gần nhất<br>• Xơ chế tự động chuyển cuốc (Re-routing) khi tài xế từ chối/hết giờ<br>• Tính toán cước phí dự kiến tĩnh<br>• Quản lý phiên chuyến đi và ghi logs |
+
+---
+
+## 2. Sơ đồ Use Case tổng quan (Diagram bằng Mermaid)
+
+```mermaid
+usecaseDiagram
+    actor KhachHang as "Khách hàng"
+    actor TaiXe as "Tài xế"
+    actor HeThong as "Hệ thống (Backend)"
+
+    rectangle "Hệ thống Nền tảng CAB - MVP" {
+        usecase "Đăng nhập / Xác thực OTP" as UC1
+        usecase "Đặt xe (Nhập điểm & Chọn loại xe)" as UC2
+        usecase "Theo dõi hành trình chuyến đi" as UC3
+        
+        usecase "Cập nhật trạng thái Online/Offline" as UC4
+        usecase "Nhận và phản hồi cuốc xe" as UC5
+        usecase "Cập nhật tiến trình chuyến đi" as UC6
+        
+        usecase "Tự động phân công tài xế (Auto-Dispatch)" as UC7
+        usecase "Tự động điều phối thay thế (Re-routing)" as UC8
+        usecase "Tính cước & Quản lý phiên" as UC9
+    }
+
+# Thiết kế Sơ đồ Use Case (Use Case Diagram & Description) - Nền tảng CAB (Giai đoạn MVP)
+
+Dựa trên phạm vi MVP đã xác định (gồm Module Khách hàng, Module Tài xế và Hệ thống trung tâm tự động hóa), dưới đây là mô hình Use Case bao gồm tác nhân, sơ đồ tổng quan và đặc tả chi tiết cho các chức năng cốt lõi.
+
+## 1. Xác định Tác nhân (Actors) và Use Case trong MVP
+
+| Tác nhân | Các Use Case chính trong MVP |
+| :--- | :--- |
+| **Khách hàng (Customer)** | • Đăng ký / Đăng nhập tài khoản (qua OTP)<br>• Nhập điểm đón / điểm đến & chọn loại xe<br>• Gửi yêu cầu đặt xe<br>• Theo dõi trạng thái & vị trí tài xế chuyến đi |
+| **Tài xế (Driver)** | • Cập nhật trạng thái hoạt động (Online / Offline)<br>• Nhận thông báo cuốc xe mới<br>• Phản hồi cuốc xe (Chấp nhận / Từ chối)<br>• Cập nhật luồng trạng thái chuyến đi (Đã đến điểm đón, Bắt đầu, Hoàn thành) |
+| **Hệ thống (System / Backend)** | • Thuật toán tự động quét và phân công tài xế gần nhất<br>• Xơ chế tự động chuyển cuốc (Re-routing) khi tài xế từ chối/hết giờ<br>• Tính toán cước phí dự kiến tĩnh<br>• Quản lý phiên chuyến đi và ghi logs |
+
+---
+
+## 2. Sơ đồ Use Case tổng quan (Diagram bằng Mermaid)
+
+```mermaid
+usecaseDiagram
+    actor KhachHang as "Khách hàng"
+    actor TaiXe as "Tài xế"
+    actor HeThong as "Hệ thống (Backend)"
+
+    rectangle "Hệ thống Nền tảng CAB - MVP" {
+        usecase "Đăng nhập / Xác thực OTP" as UC1
+        usecase "Đặt xe (Nhập điểm & Chọn loại xe)" as UC2
+        usecase "Theo dõi hành trình chuyến đi" as UC3
+        
+        usecase "Cập nhật trạng thái Online/Offline" as UC4
+        usecase "Nhận và phản hồi cuốc xe" as UC5
+        usecase "Cập nhật tiến trình chuyến đi" as UC6
+        
+        usecase "Tự động phân công tài xế (Auto-Dispatch)" as UC7
+        usecase "Tự động điều phối thay thế (Re-routing)" as UC8
+        usecase "Tính cước & Quản lý phiên" as UC9
+    }
+
+    KhachHang --> UC1
+    KhachHang --> UC2
+    KhachHang --> UC3
+
+    TaiXe --> UC1
+    TaiXe --> UC4
+    TaiXe --> UC5
+    TaiXe --> UC6
+
+    UC2 -.-> UC7 : <<include>>
+    UC5 -.-> UC8 : <<extend>>
+    UC2 -.-> UC9 : <<include>>
+    UC6 -.-> UC9 : <<include>>
+
+# Tiêu chí Chấp nhận (Acceptance Criteria - AC) cho các Yêu cầu Chức năng (FR) - MVP
+
+Dựa trên các Yêu cầu Chức năng (FR) đã xây dựng cho giai đoạn MVP của nền tảng CAB, dưới đây là các Tiêu chí Chấp nhận (Acceptance Criteria) cụ thể theo chuẩn **BDD (Behavior-Driven Development)** với định dạng `Given - When - Then` để đội ngũ phát triển và kiểm thử (QA) tiến hành nghiệm thu.
+
+---
+
+## 1. Tiêu chí Chấp nhận cho Module Khách hàng (Customer App)
+
+### FR-C01: Xác thực tài khoản (OTP)
+* **AC-01.1 (Gửi mã OTP thành công):**
+  * **Given** Khách hàng đang ở màn hình đăng nhập và nhập số điện thoại hợp lệ.
+  * **When** Khách hàng nhấn nút "Nhận mã OTP".
+  * **Then** Hệ thống phải gửi mã xác thực thành công về số điện thoại đó và hiển thị màn hình nhập OTP kèm đồng hồ đếm ngược 60 giây.
+* **AC-01.2 (Xác thực OTP hợp lệ):**
+  * **Given** Khách hàng đã nhập mã OTP gồm 6 chữ số do hệ thống cung cấp.
+  * **When** Khách hàng bấm nút "Xác nhận".
+  * **Then** Hệ thống cho phép đăng nhập thành công, lưu phiên làm việc (Session) và chuyển hướng khách hàng vào màn hình chính (Trang đặt xe).
+
+### FR-C02 & FR-C03: Nhập vị trí, Chọn loại xe và Báo giá
+* **AC-02.1 (Hiển thị cước phí dự kiến):**
+  * **Given** Khách hàng đã nhập đầy đủ địa chỉ điểm đón và điểm đến trên bản đồ.
+  * **When** Khách hàng chọn một loại phương tiện cụ thể (VD: CAB 4 chỗ).
+  * **Then** Hệ thống phải hiển thị chính xác cước phí dự kiến tính theo công thức tĩnh (Khoảng cách $\times$ Đơn giá chuẩn) và nút "Đặt xe" được kích hoạt.
+
+### FR-C04 & FR-C05: Gửi yêu cầu và Theo dõi trạng thái
+* **AC-04.1 (Chuyển trạng thái khi đặt xe):**
+  * **Given** Khách hàng đã chọn loại xe và thấy giá tiền dự kiến.
+  * **When** Khách hàng bấm nút "Đặt xe".
+  * **Then** Giao diện phải lập tức chuyển sang màn hình "Đang tìm tài xế" và hệ thống tiến hành kích hoạt thuật toán phân công ngầm dưới nền.
+
+---
+
+## 2. Tiêu chí Chấp nhận cho Module Tài xế (Driver App)
+
+### FR-D01: Chuyển đổi trạng thái (Online/Offline)
+* **AC-05.1 (Bật trạng thái sẵn sàng):**
+  * **Given** Tài xế đã đăng nhập thành công vào ứng dụng tài xế.
+  * **When** Tài xế gạt nút chuyển sang chế độ "Sẵn sàng" (Online).
+  * **Then** Ứng dụng phải bắt đầu định kỳ gửi tọa độ GPS hiện tại của tài xế về máy chủ trung tâm với tần suất 5 giây/lần.
+
+### FR-D02 & FR-D03: Nhận thông báo và Phản hồi cuốc xe
+* **AC-06.1 (Hiển thị popup nhận cuốc):**
+  * **Given** Tài xế đang ở trạng thái Online và nằm trong bán kính quét của hệ thống.
+  * **When** Có một yêu cầu đặt xe phù hợp được phát tới.
+  * **Then** Màn hình điện thoại của tài xế phải hiển thị popup thông tin chuyến đi (Điểm đón, Điểm đến, Khoảng cách) kèm thanh đếm ngược thời gian phản hồi trong 15 giây.
+* **AC-06.2 (Xử lý quá thời gian timeout):**
+  * **Given** Tài xế nhận được thông báo cuốc xe mới nhưng không bấm nút Chấp nhận trong vòng 15 giây.
+  * **When** Hết thời gian đếm ngược.
+  * **Then** Hệ thống phải tự động đóng popup, ghi nhận là "Từ chối" và chuyển cuốc xe sang tài xế tiếp theo mà không làm ảnh hưởng đến ứng dụng của tài xế.
+
+### FR-D04: Cập nhật hành trình tuần tự
+* **AC-07.1 (Tuân thủ luồng trạng thái một chiều):**
+  * **Given** Tài xế đã chấp nhận cuốc xe và đang trên đường đến điểm đón.
+  * **When** Tài xế đến nơi và bấm nút "Đã đến điểm đón".
+  * **Then** Trạng thái trên ứng dụng khách hàng phải được cập nhật thời gian thực theo, đồng thời nút bấm của tài xế chuyển sang bước tiếp theo ("Bắt đầu chuyến đi"). Tài xế không thể nhảy cóc trạng thái khi chưa hoàn thành bước trước đó.
+
+---
+
+## 3. Tiêu chí Chấp nhận cho Module Hệ thống Trung tâm (Backend Auto-Dispatch)
+
+### FR-S01 & FR-S02: Thuật toán quét và Re-routing
+* **AC-08.1 (Cơ chế tự động chuyển tài xế thay thế):**
+  * **Given** Tài xế số 1 được hệ thống chỉ định nhận cuốc nhưng bấm nút "Từ chối" hoặc bị Timeout.
+  * **When** Hệ thống nhận tín hiệu từ chối từ tài xế số 1.
+  * **Then** Hệ thống phải tự động loại bỏ tài xế số 1 khỏi phiên, tìm ngay tài xế có vị trí gần thứ hai trong bán kính cho phép và gửi thông báo cuốc xe mới tới tài xế đó trong vòng dưới 2 giây. Khách hàng hoàn toàn không phải thao tác tạo lại yêu cầu.
+
+### FR-S03: Thông báo khi hết xe
+* **AC-09.1 (Xử lý khi không còn tài xế):**
+  * **Given** Hệ thống đã thực hiện quét tìm kiếm qua toàn bộ các tài xế trong bán kính giới hạn tối đa nhưng không có ai chấp nhận hoặc không còn tài xế Online.
+  * **When** Vòng lặp quét kết thúc.
+  * **Then** Hệ thống phải đóng hoàn toàn phiên tìm kiếm, hiển thị hộp thoại thông báo lỗi rõ ràng cho khách hàng ("Hiện tại không tìm thấy tài xế phù hợp, vui lòng thử lại sau") và giải phóng dữ liệu cuốc xe.
+# Bảng Truy vết Yêu cầu (Traceability Matrix) - Nền tảng CAB (Giai đoạn MVP)
+
+Bảng truy vết dưới đây giúp kiểm soát chặt chẽ toàn bộ dự án bằng cách liên kết xuyên suốt từ **Quy tắc Nghiệp vụ (BR)**, **Yêu cầu Chức năng (FR)**, **Use Case (UC)** cho đến **Tiêu chí Chấp nhận (AC)**. Điều này đảm bảo không có yêu cầu nào bị bỏ sót và mọi tính năng đều có thể kiểm thử nghiệm thu chính xác.
+
+| Mã BR | Tên Quy tắc Nghiệp vụ (Business Rules) | Mã FR liên kết | Tên Yêu cầu Chức năng (Functional Requirements) | Mã Use Case | Mã Tiêu chí Chấp nhận (Acceptance Criteria) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **BR-01** | Quy tắc phân loại phương tiện | **FR-C02**<br>**FR-C03** | Nhập vị trí & Tìm đường<br>Báo giá cuốc xe | UC-C02 | AC-02.1 |
+| **BR-02** | Quy tắc phân công tài xế tự động | **FR-C04**<br>**FR-D01**<br>**FR-S01** | Gửi yêu cầu đặt xe<br>Chuyển trạng thái Online/Offline<br>Thuật toán quét tài xế | UC-C02<br>UC-D01<br>UC-7 | AC-04.1<br>AC-05.1 |
+| **BR-03** | Quy tắc hiển thị thông tin nhận diện | **FR-C05** | Theo dõi trạng thái & Thông tin tài xế | UC-C02<br>UC-D02 | AC-06.1 |
+| **BR-04** | Quy tắc xử lý từ chối/timeout chuyến đi | **FR-D03**<br>**FR-S02** | Chấp nhận/Từ chối cuốc xe<br>Cơ chế Re-routing thay thế | UC-D02<br>UC-8 | AC-06.2<br>AC-08.1 |
+| **BR-05** | Quy tắc thông báo khi không tìm thấy tài xế | **FR-C07**<br>**FR-S03** | Thông báo hết xe & Quản lý phiên | UC-C02<br>UC-9 | AC-09.1 |
+| **BR-06** | Quy tắc xác thực tài khoản tối giản | **FR-C01** | Xác thực tài khoản qua OTP | UC-C01<br>UC-D01 | AC-01.1<br>AC-01.2 |
+| **BR-07** | Quy tắc cập nhật trạng thái hành trình tuần tự | **FR-D04** | Cập nhật luồng trạng thái hành trình | UC-D03 | AC-07.1 |
