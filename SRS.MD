@@ -302,12 +302,33 @@ quadrantChart
 
 ---
 
+Lỗi hiển thị trong ảnh của bạn xảy ra vì bảng Markdown bị tràn dòng hoặc các thẻ `<br>` bị dính liền làm hỏng cấu trúc cột. 
+
+Dưới đây là phiên bản đã sửa lại định dạng bảng Markdown cho gọn gàng, không bị lỗi xuống dòng, kèm theo toàn bộ tài liệu chuẩn để bạn copy:
+
+# Tài liệu Phân tích Nghiệp vụ (BA) - Nền tảng Đặt xe CAB (Giai đoạn MVP)
+
+## 1. Danh sách Stakeholders (Các bên liên quan)
+
+| Tên | Vai trò |
+| :--- | :--- |
+| **Ban lãnh đạo / Ban giám đốc** | Người ra quyết định chiến lược và đầu tư nền tảng. Có nhu cầu xem báo cáo tổng quan và định hướng mở rộng hệ thống. |
+| **Khách hàng** | Người dùng cuối sử dụng hệ thống để tạo yêu cầu đặt xe, theo dõi hành trình và thanh toán cước phí. |
+| **Tài xế** | Đối tác cung cấp dịch vụ vận chuyển. Sử dụng ứng dụng để nhận yêu cầu đặt xe, cập nhật trạng thái chuyến đi và chia sẻ vị trí. |
+| **Nhân viên vận hành** | Quản lý dữ liệu hệ thống (khách hàng, tài xế, phương tiện). Giám sát các chuyến đi đang diễn ra và hỗ trợ xử lý ngoại lệ. |
+| **Business Analyst (BA)** | Người phân tích và thiết kế hệ thống. Chịu trách nhiệm xác định phạm vi, quy trình nghiệp vụ và các yêu cầu chức năng/phi chức năng. |
+| **Nhóm phát triển (Dev Team)** | Chịu trách nhiệm thiết kế kiến trúc kỹ thuật và lập trình xây dựng nền tảng CAB dựa trên các yêu cầu đã phân tích. |
+| **Cổng thanh toán (Bên thứ 3)** | Đối tác xử lý các giao dịch thanh toán điện tử, đảm bảo tính bảo mật. |
+| **Dịch vụ thông báo (Bên thứ 3)** | Hệ thống bên ngoài hỗ trợ gửi các cập nhật thời gian thực tới thiết bị của khách hàng và tài xế. |
+
+---
+
 ## 2. Ma trận Stakeholder (Power/Interest Grid)
 
-| | Mức độ quan tâm thấp (Low Interest) | Mức độ quan tâm cao (High Interest) |
+| Nhóm quyền lực / quan tâm | Mức độ quan tâm thấp (Low Interest) | Mức độ quan tâm cao (High Interest) |
 | :--- | :--- | :--- |
-| **Quyền lực cao<br>(High Power)** | **Giữ hài lòng (Keep Satisfied)**<br>• Cổng thanh toán<br>• Dịch vụ thông báo | **Quản lý chặt chẽ (Manage Closely)**<br>• Ban lãnh đạo / Ban giám đốc<br>• Nhóm phát triển (Dev Team)<br>• Business Analyst (BA) |
-| **Quyền lực thấp<br>(Low Power)** | **Theo dõi (Monitor)**<br>*(Chưa có đối tượng nổi bật)* | **Cung cấp thông tin (Keep Informed)**<br>• Khách hàng<br>• Tài xế<br>• Nhân viên vận hành |
+| **Quyền lực cao (High Power)** | **Giữ hài lòng (Keep Satisfied)**<br>• Cổng thanh toán<br>• Dịch vụ thông báo | **Quản lý chặt chẽ (Manage Closely)**<br>• Ban lãnh đạo / Ban giám đốc<br>• Nhóm phát triển (Dev Team)<br>• Business Analyst (BA) |
+| **Quyền lực thấp (Low Power)** | **Theo dõi (Monitor)**<br>• *(Chưa có đối tượng nổi bật)* | **Cung cấp thông tin (Keep Informed)**<br>• Khách hàng<br>• Tài xế<br>• Nhân viên vận hành |
 
 ```mermaid
 quadrantChart
@@ -326,3 +347,25 @@ quadrantChart
     Khách hàng: [0.90, 0.30]
     Tài xế: [0.85, 0.20]
     Nhân viên vận hành: [0.70, 0.35]
+
+# Yêu cầu Phi chức năng (Non-Functional Requirements - NFR) - Nền tảng CAB (Giai đoạn MVP)
+
+Dựa trên bối cảnh và định hướng phát triển của doanh nghiệp, các yêu cầu phi chức năng dành cho giai đoạn MVP được quy định như sau:
+
+## 1. Hiệu năng và Khả năng đáp ứng (Performance & Scalability)
+* **NFR-01 (Thời gian phản hồi API):** Các thao tác tra cứu cơ bản, định vị bản đồ và gửi yêu cầu đặt xe phải phản hồi về giao diện ứng dụng trong vòng dưới 2 giây (điều kiện mạng 4G tiêu chuẩn).
+* **NFR-02 (Tần suất cập nhật vị trí):** Tọa độ GPS của tài xế khi ở trạng thái Online phải được đồng bộ về máy chủ liên tục với tần suất 5 giây/lần để đảm bảo tính thời gian thực (real-time) cho việc điều phối.
+* **NFR-03 (Khả năng mở rộng độc lập):** Kiến trúc hệ thống phía Backend phải được tách biệt thành các dịch vụ độc lập tối thiểu giữa module xử lý chuyến đi (Dispatching) và module thông báo, nhằm đảm bảo khi lượng truy cập tăng cao không làm sập toàn bộ hệ thống.
+
+## 2. Tính sẵn sàng và Độ tin cậy (Availability & Reliability)
+* **NFR-04 (Tính sẵn sàng của dịch vụ MVP):** Hệ thống cốt lõi (Khách hàng đặt xe và Tài xế nhận cuốc) phải đạt mức độ sẵn sàng tối thiểu 99% trong giờ cao điểm.
+* **NFR-05 (Cơ chế chịu lỗi cô lập):** Lỗi phát sinh từ một dịch vụ bên thứ ba (ví dụ: mất kết nối cổng thanh toán điện tử hoặc dịch vụ gửi thông báo push notification) tuyệt đối không được làm gián đoạn luồng cốt lõi là tạo chuyến đi và phân công tài xế.
+
+## 3. Bảo mật và An toàn dữ liệu (Security & Compliance)
+* **NFR-06 (Mã hóa đường truyền):** Toàn bộ dữ liệu truyền tải giữa ứng dụng di động (Mobile App) và máy chủ (Server) phải được mã hóa bắt buộc thông qua giao thức HTTPS / TLS 1.3.
+* **NFR-07 (Bảo mật thông tin thanh toán):** Đúng theo yêu cầu của doanh nghiệp, hệ thống CAB không được phép lưu trữ trực tiếp các thông tin nhạy cảm của thẻ ngân hàng hoặc tài khoản thanh toán điện tử trên cơ sở dữ liệu nội bộ; mọi giao dịch phải điều hướng qua bên thứ ba đạt chuẩn PCI-DSS.
+* **NFR-08 (Xác thực và phân quyền):** Mọi phiên làm việc (Session) của khách hàng và tài xế phải thông qua token định danh bảo mật sau khi xác thực OTP thành công. Các thao tác can thiệp hệ thống từ nhân viên vận hành bắt buộc phải được ghi vết (audit log).
+
+## 4. Khả năng bảo trì và Triển khai (Maintainability & Deployability)
+* **NFR-09 (Triển khai từng phần):** Hệ thống phải cho phép nhóm phát triển cập nhật hoặc vá lỗi từng module riêng biệt (như module khách hàng hoặc module tài xế) mà không bắt buộc phải dừng toàn bộ hệ thống (Zero-downtime deployment cho các bản cập nhật nhỏ).
+* **NFR-10 (Lưu trữ Nhật ký hệ thống - Logging):** Hệ thống phải ghi lại toàn bộ các sự kiện lỗi quan trọng (Error logs), lịch sử trạng thái chuyến đi và lịch sử phản hồi của tài xế trong cơ sở dữ liệu để phục vụ công tác tra cứu, giải quyết tranh chấp khi có sự cố phát sinh.
