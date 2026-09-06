@@ -37,8 +37,8 @@ quadrantChart
     quadrant-3 Theo dõi
     quadrant-4 Cung cấp thông tin
     Ban lãnh đạo: [0.85, 0.90]
-    Business Analyst (BA): [0.80, 0.80]
-    Nhóm phát triển (Dev): [0.90, 0.75]
+    Business Analyst: [0.80, 0.80]
+    Nhóm phát triển: [0.90, 0.75]
     Cổng thanh toán: [0.25, 0.85]
     Dịch vụ thông báo: [0.35, 0.75]
     Khách hàng: [0.90, 0.30]
@@ -46,14 +46,111 @@ quadrantChart
     Nhân viên vận hành: [0.70, 0.35]
 ```
 
-**Danh sách Mục tiêu nghiệp vụ (Business Requirements - BR)**
+# Business Rules – CAB System MVP
 
-| Mã BR | Mục tiêu nghiệp vụ | Mô tả chi tiết |
-| :--- | :--- | :--- |
-| **BR-01** | **Tự động hóa điều phối và phân công** | Thay thế quy trình thủ công bằng thuật toán tìm kiếm, ưu tiên và phân công tài xế tự động (dựa trên vị trí, trạng thái). Tự động tìm tài xế thay thế nếu bị từ chối mà không cần khách tạo lại yêu cầu. |
-| **BR-02** | **Quản lý cước phí và thanh toán tập trung** | Tự động tính toán cước phí sau chuyến đi. Tích hợp thanh toán điện tử qua bên thứ ba an toàn (không lưu dữ liệu thẻ trực tiếp trên hệ thống CAB) và hỗ trợ xử lý khi giao dịch thất bại. |
-| **BR-03** | **Minh bạch hóa thông tin và hành trình** | Cung cấp thông tin thời gian thực cho khách hàng về vị trí tài xế, thời gian đến dự kiến, trạng thái chuyến đi và lịch sử giao dịch thông qua hệ thống thông báo đa kênh. |
-| **BR-04** | **Tối ưu hóa quản trị vận hành** | Cung cấp giao diện quản trị phân quyền cho nhân viên vận hành để giám sát chuyến đi, xử lý ngoại lệ, quản lý hồ sơ (khách hàng, tài xế, xe) và xuất báo cáo hiệu suất (doanh thu, tỷ lệ hủy, số chuyến). |
-| **BR-05** | **Đảm bảo tính linh hoạt và khả năng mở rộng** | Xây dựng kiến trúc hệ thống cho phép dễ dàng bổ sung loại dịch vụ mới, thêm cổng thanh toán hoặc nhà cung cấp thông báo trong tương lai mà không phải đập đi xây lại. |
-| **BR-06** | **Đảm bảo hiệu suất và tính sẵn sàng cao** | Hệ thống phải hoạt động ổn định khi nhu cầu tăng cao. Các thành phần (ví dụ: thanh toán, thông báo) phải độc lập; lỗi ở một module không được làm gián đoạn toàn bộ hệ thống đặt xe. |
-| **BR-07** | **Đảm bảo an toàn thông tin và bảo mật** | Yêu cầu xác thực tài khoản chặt chẽ, bảo vệ dữ liệu cá nhân, dữ liệu vị trí và giao dịch. Lưu vết (log) các thao tác quan trọng trên hệ thống để phục vụ kiểm tra khi có sự cố. |
+## 1. Quy tắc tài khoản và phân quyền
+
+| Mã | Business Rule |
+|---|---|
+| **BR-01** | Khách hàng và tài xế phải được xác thực trước khi sử dụng các chức năng yêu cầu tài khoản. |
+| **BR-02** | Chỉ người dùng có quyền phù hợp mới được thực hiện các thao tác quản trị. |
+| **BR-03** | Thông tin cá nhân của khách hàng và tài xế phải được bảo vệ. |
+
+---
+
+## 2. Quy tắc đặt xe
+
+| Mã | Business Rule |
+|---|---|
+| **BR-04** | Một yêu cầu đặt xe phải có điểm đón, điểm đến và loại xe. |
+| **BR-05** | Sau khi khách hàng gửi yêu cầu, hệ thống phải chuyển yêu cầu sang trạng thái tìm tài xế. |
+| **BR-06** | Khách hàng phải được thông báo về trạng thái xử lý yêu cầu đặt xe. |
+
+---
+
+## 3. Quy tắc tìm và phân công tài xế
+
+| Mã | Business Rule |
+|---|---|
+| **BR-07** | Hệ thống chỉ xem xét các tài xế đang ở trạng thái sẵn sàng nhận chuyến. |
+| **BR-08** | Tài xế được lựa chọn phải phù hợp với loại xe mà khách hàng yêu cầu. |
+| **BR-09** | Hệ thống phải ưu tiên tài xế phù hợp và gần điểm đón của khách hàng. |
+| **BR-10** | Nếu tài xế được đề xuất không phản hồi hoặc từ chối chuyến, hệ thống phải tiếp tục tìm tài xế khác. |
+| **BR-11** | Nếu không tìm được tài xế phù hợp, hệ thống phải thông báo cho khách hàng. |
+| **BR-12** | Khi tài xế chấp nhận chuyến, hệ thống phải ghi nhận tài xế được phân công cho chuyến đó. |
+
+---
+
+## 4. Quy tắc thực hiện chuyến
+
+| Mã | Business Rule |
+|---|---|
+| **BR-13** | Tài xế phải cập nhật trạng thái chuyến trong quá trình thực hiện. |
+| **BR-14** | Các trạng thái chính của chuyến gồm: tìm tài xế, đã phân công tài xế, tài xế đến điểm đón, đã đón khách, đang di chuyển và hoàn thành. |
+| **BR-15** | Khi chuyến hoàn thành, hệ thống phải ghi nhận thông tin chuyến để phục vụ tính cước, thanh toán và lưu lịch sử. |
+| **BR-16** | Hệ thống phải lưu thông tin vị trí của tài xế để hỗ trợ tìm tài xế và dự kiến thời gian đến. |
+
+---
+
+## 5. Quy tắc tính cước và thanh toán
+
+| Mã | Business Rule |
+|---|---|
+| **BR-17** | Sau khi chuyến hoàn thành, hệ thống phải xác định số tiền khách hàng phải trả dựa trên loại dịch vụ và thông tin chuyến đi. |
+| **BR-18** | Khách hàng được phép thanh toán bằng tiền mặt hoặc phương thức thanh toán điện tử được hệ thống hỗ trợ. |
+| **BR-19** | Thông tin nhạy cảm của thẻ hoặc tài khoản thanh toán không được lưu trực tiếp trong hệ thống CAB. |
+| **BR-20** | Thanh toán điện tử phải được xử lý thông qua nhà cung cấp dịch vụ thanh toán bên ngoài. |
+| **BR-21** | Khi thanh toán điện tử thất bại, hệ thống phải thông báo cho khách hàng và cho phép xử lý lại theo chính sách của doanh nghiệp. |
+
+---
+
+## 6. Quy tắc thông báo
+
+| Mã | Business Rule |
+|---|---|
+| **BR-22** | Khách hàng phải được thông báo khi yêu cầu đặt xe được tiếp nhận. |
+| **BR-23** | Khách hàng phải được thông báo khi tài xế nhận chuyến. |
+| **BR-24** | Khách hàng phải được thông báo khi tài xế đến điểm đón. |
+| **BR-25** | Khách hàng phải được thông báo khi chuyến xe hoàn thành và khi thanh toán có kết quả. |
+| **BR-26** | Tài xế phải được thông báo khi có chuyến mới hoặc có thay đổi liên quan đến chuyến đang thực hiện. |
+
+---
+
+## 7. Quy tắc vận hành
+
+| Mã | Business Rule |
+|---|---|
+| **BR-27** | Nhân viên vận hành được phép theo dõi các chuyến đang diễn ra và trạng thái tài xế theo quyền được cấp. |
+| **BR-28** | Nhân viên vận hành được phép hỗ trợ xử lý các trường hợp chuyến bị lỗi theo chính sách của doanh nghiệp. |
+| **BR-29** | Các thao tác quản trị quan trọng phải được lưu vết để phục vụ kiểm tra và xử lý sự cố. |
+
+---
+
+# Business Rules cần xác nhận
+
+Các quy tắc dưới đây chưa được xác định cụ thể trong yêu cầu hiện tại. Cần trao đổi với khách hàng hoặc Ban giám đốc trước khi triển khai chính thức.
+
+| Mã | Nội dung cần xác nhận |
+|---|---|
+| **BR-Q01** | Bán kính tối đa để hệ thống tìm kiếm tài xế là bao nhiêu? |
+| **BR-Q02** | Tài xế có bao nhiêu thời gian để phản hồi yêu cầu chuyến? |
+| **BR-Q03** | Sau khi tài xế từ chối hoặc không phản hồi, hệ thống chuyển sang tài xế tiếp theo sau bao lâu? |
+| **BR-Q04** | Ngoài khoảng cách, hệ thống có tiêu chí nào khác để ưu tiên tài xế không? |
+| **BR-Q05** | Công thức tính cước chuyến xe cụ thể là gì? |
+| **BR-Q06** | Có áp dụng phụ phí theo thời điểm, quãng đường, loại xe hoặc điều kiện khác không? |
+| **BR-Q07** | Khách hàng có được phép hủy chuyến không và có phát sinh phí hủy không? |
+| **BR-Q08** | Nếu tài xế hủy chuyến sau khi đã nhận, hệ thống có tự động tìm tài xế khác không? |
+| **BR-Q09** | Khi thanh toán điện tử thất bại, khách hàng được phép thanh toán lại bao nhiêu lần? |
+| **BR-Q10** | Khi mất kết nối mạng hoặc GPS, hệ thống xử lý trạng thái chuyến và vị trí tài xế như thế nào? |
+
+---
+
+# Tổng kết Business Rules
+
+| Loại | Số lượng | Phạm vi |
+|---|---:|---|
+| Business Rules chính thức | **29** | Sử dụng cho MVP |
+| Business Rules cần xác nhận | **10** | Cần thống nhất với khách hàng |
+| **Tổng cộng** | **39** | Bao gồm cả nội dung cần xác nhận |
+
+> **Lưu ý:** BR-Q01 đến BR-Q10 chưa được xem là Business Rule chính thức của hệ thống. Sau khi khách hàng xác nhận, các nội dung này mới được chuẩn hóa thành Business Rule chính thức và đánh số lại nếu cần.
