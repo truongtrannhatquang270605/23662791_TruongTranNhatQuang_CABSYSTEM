@@ -154,3 +154,17 @@ Các quy tắc dưới đây chưa được xác định cụ thể trong yêu c
 | **Tổng cộng** | **39** | Bao gồm cả nội dung cần xác nhận |
 
 > **Lưu ý:** BR-Q01 đến BR-Q10 chưa được xem là Business Rule chính thức của hệ thống. Sau khi khách hàng xác nhận, các nội dung này mới được chuẩn hóa thành Business Rule chính thức và đánh số lại nếu cần.
+
+**Module Quản lý Khách hàng (MVP)**
+* **Xác thực cơ bản:** Đăng ký và đăng nhập nhanh bằng số điện thoại.
+* **Đặt xe (Luồng cốt lõi):** Cho phép nhập điểm đón và điểm đến qua API bản đồ; hệ thống hiển thị cước phí dự kiến dựa trên công thức tĩnh (tổng quãng đường x đơn giá).
+* **Theo dõi hành trình:** Cập nhật theo thời gian thực 4 trạng thái chính yếu: Đang tìm tài xế $\rightarrow$ Tài xế đang đến $\rightarrow$ Đang di chuyển $\rightarrow$ Hoàn thành.
+* **Thanh toán tối giản:** Triển khai thanh toán bằng tiền mặt (Cash) và tối đa một cổng thanh toán điện tử cơ bản để ghi nhận luồng tiền.
+* **Ngoài phạm vi MVP (Out of scope):** Đánh giá tài xế, lưu địa chỉ yêu thích, mã khuyến mãi, phân hạng thành viên.
+
+**Module Quản lý Tài xế (MVP)**
+* **Quản lý hồ sơ tối giản:** Bỏ qua quy trình tự đăng ký phức tạp. Tài khoản tài xế có thể do nhân viên vận hành tạo và cấp quyền trực tiếp để nhanh chóng đưa vào hoạt động.
+* **Cập nhật trạng thái làm việc:** Cung cấp duy nhất nút bật/tắt trạng thái sẵn sàng (Online/Offline) và liên tục gửi tọa độ GPS về hệ thống.
+* **Thuật toán phân công (Dispatching) cơ bản:** Sử dụng cơ chế tìm kiếm theo bán kính địa lý gần nhất (ví dụ: quét các tài xế trống trong bán kính 2km) hoặc cơ chế Broadcast (phát đồng loạt). Bỏ qua hoàn toàn các tham số ưu tiên về tỷ lệ nhận chuyến, điểm đánh giá hay thâm niên.
+* **Thực thi chuyến đi:** Giao diện thao tác một chạm để tài xế cập nhật luồng trạng thái: Chấp nhận chuyến $\rightarrow$ Đã đến điểm đón $\rightarrow$ Bắt đầu hành trình $\rightarrow$ Kết thúc chuyến.
+* **Ngoài phạm vi MVP (Out of scope):** Điểm đánh giá (Rating), hệ thống thưởng/phạt (Penalty), ví nội bộ phức tạp, xem thống kê hiệu suất tài xế.
