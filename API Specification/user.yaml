@@ -1,1 +1,290 @@
+openapi: 3.0.3
 
+info:
+  title: CAB System - User API
+  description: |
+    REST API quản lý người dùng cho hệ thống CAB System.
+    API hỗ trợ các chức năng CRUD User:
+    - Create User
+    - Get User
+    - Get All Users
+    - Update User
+    - Delete User
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development server
+
+tags:
+  - name: Users
+    description: API quản lý người dùng
+
+paths:
+
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Lấy danh sách người dùng
+      description: Lấy danh sách tất cả người dùng trong hệ thống.
+      operationId: getUsers
+
+      responses:
+        '200':
+          description: Lấy danh sách người dùng thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponse'
+
+        '500':
+          description: Lỗi máy chủ
+
+    post:
+      tags:
+        - Users
+      summary: Tạo người dùng
+      description: Tạo một tài khoản người dùng mới.
+      operationId: createUser
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+
+      responses:
+        '201':
+          description: Tạo người dùng thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+        '400':
+          description: Dữ liệu đầu vào không hợp lệ
+
+        '409':
+          description: Email hoặc số điện thoại đã tồn tại
+
+        '500':
+          description: Lỗi máy chủ
+
+  /users/{userId}:
+
+    get:
+      tags:
+        - Users
+      summary: Lấy thông tin người dùng
+      description: Lấy thông tin một người dùng theo ID.
+      operationId: getUserById
+
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+
+      responses:
+        '200':
+          description: Lấy thông tin thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+        '404':
+          description: Không tìm thấy người dùng
+
+        '500':
+          description: Lỗi máy chủ
+
+    put:
+      tags:
+        - Users
+      summary: Cập nhật người dùng
+      description: Cập nhật toàn bộ thông tin người dùng theo ID.
+      operationId: updateUser
+
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+
+      responses:
+        '200':
+          description: Cập nhật người dùng thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+        '400':
+          description: Dữ liệu đầu vào không hợp lệ
+
+        '404':
+          description: Không tìm thấy người dùng
+
+        '409':
+          description: Email hoặc số điện thoại đã tồn tại
+
+        '500':
+          description: Lỗi máy chủ
+
+    delete:
+      tags:
+        - Users
+      summary: Xóa người dùng
+      description: Xóa người dùng theo ID.
+      operationId: deleteUser
+
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+
+      responses:
+        '204':
+          description: Xóa người dùng thành công
+
+        '404':
+          description: Không tìm thấy người dùng
+
+        '500':
+          description: Lỗi máy chủ
+
+components:
+
+  parameters:
+
+    UserId:
+      name: userId
+      in: path
+      required: true
+      description: ID của người dùng
+      schema:
+        type: integer
+        format: int64
+        example: 1
+
+  schemas:
+
+    UserResponse:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          format: int64
+          example: 1
+
+        full_name:
+          type: string
+          example: Nguyen Van A
+
+        phone:
+          type: string
+          example: "0901234567"
+
+        email:
+          type: string
+          format: email
+          example: nguyenvana@gmail.com
+
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+            - BLOCKED
+          example: ACTIVE
+
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-09-13T08:00:00Z"
+
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-09-13T08:30:00Z"
+
+    CreateUserRequest:
+      type: object
+      required:
+        - full_name
+        - phone
+        - email
+        - password
+      properties:
+
+        full_name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: Nguyen Van A
+
+        phone:
+          type: string
+          example: "0901234567"
+
+        email:
+          type: string
+          format: email
+          example: nguyenvana@gmail.com
+
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: "Password123!"
+
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+            - BLOCKED
+          default: ACTIVE
+          example: ACTIVE
+
+    UpdateUserRequest:
+      type: object
+      required:
+        - full_name
+        - phone
+        - email
+        - status
+      properties:
+
+        full_name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: Nguyen Van B
+
+        phone:
+          type: string
+          example: "0912345678"
+
+        email:
+          type: string
+          format: email
+          example: nguyenvanb@gmail.com
+
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: "NewPassword123!"
+
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+            - BLOCKED
+          example: ACTIVE
