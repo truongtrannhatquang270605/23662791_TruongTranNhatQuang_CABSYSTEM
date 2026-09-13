@@ -1,0 +1,296 @@
+openapi: 3.0.3
+
+info:
+  title: CAB System - Customer API
+  description: API quản lý thông tin khách hàng
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+
+tags:
+  - name: Customers
+    description: Quản lý khách hàng
+
+paths:
+
+  /customers:
+
+    get:
+      tags:
+        - Customers
+      summary: Lấy danh sách khách hàng
+      operationId: getCustomers
+
+      security:
+        - bearerAuth: []
+
+      responses:
+        '200':
+          description: Lấy danh sách khách hàng thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerResponse'
+
+        '401':
+          description: Chưa xác thực
+
+        '403':
+          description: Không có quyền truy cập
+
+        '500':
+          description: Lỗi máy chủ
+
+    post:
+      tags:
+        - Customers
+      summary: Tạo khách hàng
+      operationId: createCustomer
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomerRequest'
+
+      responses:
+        '201':
+          description: Tạo khách hàng thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+
+        '400':
+          description: Dữ liệu không hợp lệ
+
+        '409':
+          description: Email hoặc số điện thoại đã tồn tại
+
+        '500':
+          description: Lỗi máy chủ
+
+  /customers/{customerId}:
+
+    get:
+      tags:
+        - Customers
+      summary: Lấy thông tin khách hàng
+      operationId: getCustomerById
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+
+      responses:
+        '200':
+          description: Lấy thông tin khách hàng thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+
+        '401':
+          description: Chưa xác thực
+
+        '404':
+          description: Không tìm thấy khách hàng
+
+        '500':
+          description: Lỗi máy chủ
+
+    put:
+      tags:
+        - Customers
+      summary: Cập nhật thông tin khách hàng
+      operationId: updateCustomer
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomerRequest'
+
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+
+        '400':
+          description: Dữ liệu không hợp lệ
+
+        '401':
+          description: Chưa xác thực
+
+        '404':
+          description: Không tìm thấy khách hàng
+
+        '409':
+          description: Email hoặc số điện thoại đã tồn tại
+
+        '500':
+          description: Lỗi máy chủ
+
+    delete:
+      tags:
+        - Customers
+      summary: Xóa khách hàng
+      operationId: deleteCustomer
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+
+      responses:
+        '204':
+          description: Xóa khách hàng thành công
+
+        '401':
+          description: Chưa xác thực
+
+        '404':
+          description: Không tìm thấy khách hàng
+
+        '500':
+          description: Lỗi máy chủ
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+
+    CustomerId:
+      name: customerId
+      in: path
+      required: true
+      description: ID khách hàng
+      schema:
+        type: integer
+        format: int64
+        example: 1
+
+  schemas:
+
+    CustomerResponse:
+      type: object
+      properties:
+        customer_id:
+          type: integer
+          format: int64
+          example: 1
+
+        full_name:
+          type: string
+          example: Nguyen Van A
+
+        phone:
+          type: string
+          example: "0901234567"
+
+        email:
+          type: string
+          format: email
+          example: nguyenvana@gmail.com
+
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+            - BLOCKED
+          example: ACTIVE
+
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-09-13T08:00:00Z"
+
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-09-13T08:30:00Z"
+
+    CreateCustomerRequest:
+      type: object
+      required:
+        - full_name
+        - phone
+        - email
+        - password
+
+      properties:
+
+        full_name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: Nguyen Van A
+
+        phone:
+          type: string
+          example: "0901234567"
+
+        email:
+          type: string
+          format: email
+          example: nguyenvana@gmail.com
+
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: "Password123!"
+
+    UpdateCustomerRequest:
+      type: object
+      properties:
+
+        full_name:
+          type: string
+          example: Nguyen Van B
+
+        phone:
+          type: string
+          example: "0912345678"
+
+        email:
+          type: string
+          format: email
+          example: nguyenvanb@gmail.com
+
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: "NewPassword123!"
+
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+            - BLOCKED
+          example: ACTIVE
