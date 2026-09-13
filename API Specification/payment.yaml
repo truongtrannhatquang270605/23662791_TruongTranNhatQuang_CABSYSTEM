@@ -1,0 +1,352 @@
+openapi: 3.0.3
+
+info:
+  title: CAB System - Payment API
+  description: API tính cước và quản lý thanh toán cho chuyến xe
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+
+tags:
+  - name: Payments
+    description: Quản lý thanh toán
+
+paths:
+
+  /payments:
+
+    post:
+      tags:
+        - Payments
+      summary: Tạo giao dịch thanh toán
+      description: |
+        Tạo giao dịch thanh toán cho chuyến xe đã hoàn thành.
+        Hệ thống không lưu trực tiếp thông tin nhạy cảm của thẻ
+        hoặc tài khoản thanh toán.
+      operationId: createPayment
+
+      security:
+        - bearerAuth: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentRequest'
+
+      responses:
+
+        '201':
+          description: Tạo giao dịch thanh toán thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+
+        '400':
+          description: Dữ liệu thanh toán không hợp lệ
+
+        '401':
+          description: Chưa xác thực
+
+        '404':
+          description: Không tìm thấy chuyến xe
+
+        '409':
+          description: Chuyến xe đã được thanh toán
+
+        '500':
+          description: Lỗi máy chủ
+
+
+  /payments/{paymentId}:
+
+    get:
+      tags:
+        - Payments
+      summary: Xem thông tin thanh toán
+      operationId: getPaymentById
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: '#/components/parameters/PaymentId'
+
+      responses:
+
+        '200':
+          description: Lấy thông tin thanh toán thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+
+        '401':
+          description: Chưa xác thực
+
+        '404':
+          description: Không tìm thấy giao dịch
+
+        '500':
+          description: Lỗi máy chủ
+
+
+  /payments/{paymentId}/retry:
+
+    post:
+      tags:
+        - Payments
+      summary: Thử lại thanh toán
+      description: |
+        Thực hiện lại giao dịch thanh toán điện tử khi giao dịch trước đó thất bại.
+        Chỉ cho phép retry đối với giao dịch ở trạng thái FAILED.
+      operationId: retryPayment
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: '#/components/parameters/PaymentId'
+
+      responses:
+
+        '200':
+          description: Xử lý lại thanh toán
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+
+        '400':
+          description: Giao dịch không thể retry
+
+        '401':
+          description: Chưa xác thực
+
+        '404':
+          description: Không tìm thấy giao dịch
+
+        '500':
+          description: Lỗi máy chủ
+
+
+  /trips/{tripId}/fare:
+
+    get:
+      tags:
+        - Payments
+      summary: Tính cước chuyến xe
+      description: |
+        Tính số tiền khách hàng phải trả dựa trên loại dịch vụ
+        và thông tin chuyến đi.
+      operationId: calculateFare
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: '#/components/parameters/TripId'
+
+      responses:
+
+        '200':
+          description: Tính cước thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FareResponse'
+
+        '401':
+          description: Chưa xác thực
+
+        '404':
+          description: Không tìm thấy chuyến xe
+
+        '409':
+          description: Chuyến xe chưa đủ điều kiện tính cước
+
+        '500':
+          description: Lỗi máy chủ
+
+
+components:
+
+  securitySchemes:
+
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+
+  parameters:
+
+    PaymentId:
+      name: paymentId
+      in: path
+      required: true
+      description: ID giao dịch thanh toán
+      schema:
+        type: integer
+        format: int64
+        example: 10001
+
+    TripId:
+      name: tripId
+      in: path
+      required: true
+      description: ID chuyến xe
+      schema:
+        type: integer
+        format: int64
+        example: 1001
+
+
+  schemas:
+
+    CreatePaymentRequest:
+      type: object
+      required:
+        - trip_id
+        - payment_method
+
+      properties:
+
+        trip_id:
+          type: integer
+          format: int64
+          example: 1001
+
+        payment_method:
+          type: string
+          enum:
+            - CASH
+            - ELECTRONIC
+          example: ELECTRONIC
+
+        provider:
+          type: string
+          nullable: true
+          description: Nhà cung cấp thanh toán bên ngoài
+          example: VNPAY
+
+
+    PaymentResponse:
+      type: object
+      properties:
+
+        payment_id:
+          type: integer
+          format: int64
+          example: 10001
+
+        trip_id:
+          type: integer
+          format: int64
+          example: 1001
+
+        customer_id:
+          type: integer
+          format: int64
+          example: 1
+
+        amount:
+          type: number
+          format: double
+          example: 85000
+
+        currency:
+          type: string
+          example: VND
+
+        payment_method:
+          type: string
+          enum:
+            - CASH
+            - ELECTRONIC
+          example: ELECTRONIC
+
+        provider:
+          type: string
+          nullable: true
+          example: VNPAY
+
+        transaction_id:
+          type: string
+          nullable: true
+          description: Mã giao dịch do nhà cung cấp thanh toán trả về
+          example: TXN202609130001
+
+        status:
+          type: string
+          enum:
+            - PENDING
+            - SUCCESS
+            - FAILED
+            - CANCELLED
+          example: SUCCESS
+
+        failure_reason:
+          type: string
+          nullable: true
+          example: Insufficient balance
+
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-09-13T10:00:00Z"
+
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-09-13T10:02:00Z"
+
+
+    FareResponse:
+      type: object
+      properties:
+
+        trip_id:
+          type: integer
+          format: int64
+          example: 1001
+
+        service_type:
+          type: string
+          example: CAR_4_SEATS
+
+        distance_km:
+          type: number
+          format: double
+          example: 12.5
+
+        duration_minutes:
+          type: integer
+          example: 35
+
+        base_fare:
+          type: number
+          format: double
+          example: 50000
+
+        distance_fare:
+          type: number
+          format: double
+          example: 25000
+
+        additional_fee:
+          type: number
+          format: double
+          example: 10000
+
+        total_amount:
+          type: number
+          format: double
+          example: 85000
+
+        currency:
+          type: string
+          example: VND
