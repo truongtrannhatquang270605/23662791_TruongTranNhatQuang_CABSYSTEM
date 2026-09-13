@@ -1,0 +1,302 @@
+openapi: 3.0.3
+
+info:
+  title: CAB System - Booking API
+  description: API tạo và quản lý yêu cầu đặt xe
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+
+tags:
+  - name: Bookings
+    description: Quản lý yêu cầu đặt xe
+
+paths:
+
+  /bookings:
+
+    get:
+      tags:
+        - Bookings
+      summary: Lấy danh sách yêu cầu đặt xe
+      operationId: getBookings
+
+      security:
+        - bearerAuth: []
+
+      responses:
+        '200':
+          description: Lấy danh sách thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingResponse'
+
+    post:
+      tags:
+        - Bookings
+      summary: Tạo yêu cầu đặt xe
+      operationId: createBooking
+
+      security:
+        - bearerAuth: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingRequest'
+
+      responses:
+        '201':
+          description: Tạo yêu cầu đặt xe thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+
+        '400':
+          description: Thiếu hoặc sai thông tin đặt xe
+
+        '401':
+          description: Chưa đăng nhập
+
+  /bookings/{bookingId}:
+
+    get:
+      tags:
+        - Bookings
+      summary: Xem chi tiết yêu cầu đặt xe
+      operationId: getBookingById
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+
+      responses:
+        '200':
+          description: Lấy thông tin thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+
+        '404':
+          description: Không tìm thấy yêu cầu
+
+    put:
+      tags:
+        - Bookings
+      summary: Cập nhật yêu cầu đặt xe
+      operationId: updateBooking
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBookingRequest'
+
+      responses:
+        '200':
+          description: Cập nhật yêu cầu thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+
+        '400':
+          description: Dữ liệu không hợp lệ
+
+        '404':
+          description: Không tìm thấy yêu cầu
+
+    delete:
+      tags:
+        - Bookings
+      summary: Hủy yêu cầu đặt xe
+      operationId: cancelBooking
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+
+      responses:
+        '204':
+          description: Hủy yêu cầu thành công
+
+        '400':
+          description: Không thể hủy yêu cầu hiện tại
+
+        '404':
+          description: Không tìm thấy yêu cầu
+
+  /bookings/{bookingId}/assign:
+
+    put:
+      tags:
+        - Bookings
+      summary: Gán tài xế và phương tiện
+      operationId: assignDriverAndVehicle
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignDriverRequest'
+
+      responses:
+        '200':
+          description: Gán tài xế và phương tiện thành công
+
+        '400':
+          description: Tài xế hoặc phương tiện không hợp lệ
+
+        '409':
+          description: Tài xế không còn khả dụng
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+
+    BookingId:
+      name: bookingId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        example: 1001
+
+  schemas:
+
+    BookingResponse:
+      type: object
+      properties:
+
+        booking_id:
+          type: integer
+          example: 1001
+
+        customer_id:
+          type: integer
+          example: 1
+
+        driver_id:
+          type: integer
+          nullable: true
+          example: 10
+
+        vehicle_id:
+          type: integer
+          nullable: true
+          example: 20
+
+        pickup_location:
+          type: string
+          example: "Đại học Công nghiệp TP.HCM"
+
+        destination:
+          type: string
+          example: "Sân bay Tân Sơn Nhất"
+
+        vehicle_type_requested:
+          type: string
+          example: CAR_4_SEATS
+
+        status:
+          type: string
+          enum:
+            - CREATED
+            - SEARCHING_DRIVER
+            - DRIVER_ASSIGNED
+            - IN_PROGRESS
+            - COMPLETED
+            - CANCELLED
+          example: SEARCHING_DRIVER
+
+        created_at:
+          type: string
+          format: date-time
+
+    CreateBookingRequest:
+      type: object
+      required:
+        - pickup_location
+        - destination
+        - vehicle_type_requested
+
+      properties:
+
+        pickup_location:
+          type: string
+          example: "Đại học Công nghiệp TP.HCM"
+
+        destination:
+          type: string
+          example: "Sân bay Tân Sơn Nhất"
+
+        vehicle_type_requested:
+          type: string
+          enum:
+            - CAR_4_SEATS
+            - CAR_7_SEATS
+
+    UpdateBookingRequest:
+      type: object
+      properties:
+
+        pickup_location:
+          type: string
+
+        destination:
+          type: string
+
+        vehicle_type_requested:
+          type: string
+          enum:
+            - CAR_4_SEATS
+            - CAR_7_SEATS
+
+    AssignDriverRequest:
+      type: object
+      required:
+        - driver_id
+        - vehicle_id
+
+      properties:
+
+        driver_id:
+          type: integer
+          example: 10
+
+        vehicle_id:
+          type: integer
+          example: 20
