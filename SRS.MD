@@ -1,646 +1,795 @@
-**Danh sách Stakeholders (Các bên liên quan) - Nền tảng đặt xe CAB**
+# PHÂN TÍCH NGHIỆP VỤ CAB SYSTEM – MVP
 
-| Tên | Vai trò |
-| :--- | :--- |
-| **Ban lãnh đạo / Ban giám đốc** | Người ra quyết định chiến lược và đầu tư nền tảng. Có nhu cầu xem các báo cáo tổng quan (doanh thu, số lượng chuyến, tỷ lệ hoàn thành/hủy, hiệu suất) và định hướng mở rộng hệ thống trong tương lai. |
-| **Khách hàng** | Người dùng cuối sử dụng hệ thống để đăng ký/đăng nhập, tạo yêu cầu đặt xe, theo dõi hành trình, thanh toán cước phí và đánh giá tài xế sau chuyến đi. |
-| **Tài xế** | Đối tác cung cấp dịch vụ vận chuyển. Sử dụng ứng dụng để nhận/từ chối yêu cầu đặt xe, chia sẻ vị trí liên tục và cập nhật các trạng thái của chuyến đi (đã đến, đã đón khách, hoàn thành). |
-| **Nhân viên vận hành** | Quản lý dữ liệu hệ thống (khách hàng, tài xế, phương tiện). Giám sát các chuyến đi đang diễn ra, hỗ trợ xử lý ngoại lệ/lỗi và tra cứu lịch sử giao dịch thông qua phân quyền. |
-| **Business Analyst (BA)** | Người phân tích và thiết kế hệ thống. Chịu trách nhiệm xác định phạm vi, quy trình nghiệp vụ, các trường hợp ngoại lệ và làm rõ các quy tắc nghiệp vụ chưa chốt (tính cước, tiêu chí ưu tiên, chính sách hủy) với các bên liên quan. |
-| **Nhóm phát triển (Development Team)** | Chịu trách nhiệm thiết kế kiến trúc kỹ thuật linh hoạt, độc lập, có khả năng mở rộng cao và lập trình xây dựng nền tảng CAB dựa trên các yêu cầu đã được phân tích. |
-| **Nhà cung cấp cổng thanh toán (Bên thứ 3)** | Đối tác xử lý các giao dịch thanh toán điện tử, đảm bảo tính bảo mật và toàn vẹn của dữ liệu thẻ/tài khoản mà không lưu trữ trực tiếp trên CAB. |
-| **Nhà cung cấp dịch vụ thông báo (Bên thứ 3)** | Hệ thống bên ngoài hỗ trợ gửi các cập nhật thời gian thực (trạng thái chuyến đi, thanh toán) tới thiết bị của khách hàng và tài xế. |
+> **Cơ sở phân tích:** tài liệu yêu cầu khách hàng về dự án **CAB System – Nền tảng đặt xe**, thời gian xây dựng 7 tuần. Tài liệu xác định 3 nhóm người dùng chính là khách hàng, tài xế và nhân viên vận hành; đồng thời yêu cầu hệ thống có khả năng mở rộng về sau. fileciteturn0file0L3-L10
+>
+> **Phạm vi MVP theo đề bài:** chỉ tập trung vào **2 module chính**:
+> 1. **Quản lý khách hàng**
+> 2. **Quản lý tài xế**
+>
+> Các chức năng như thanh toán, báo cáo quản trị, đánh giá tài xế, thuật toán phân công thông minh... **chưa triển khai đầy đủ trong MVP**. Đây cũng phù hợp với tài liệu vì doanh nghiệp chưa chốt một số quy tắc chi tiết và mong muốn BA làm rõ trước khi phát triển. fileciteturn0file0L54-L59
 
-**Ma trận Stakeholder (Power/Interest Grid) - Nền tảng CAB**
+---
 
-| | Mức độ quan tâm thấp (Low Interest) | Mức độ quan tâm cao (High Interest) |
-| :--- | :--- | :--- |
-| **Quyền lực cao<br>(High Power)** | **Giữ hài lòng (Keep Satisfied)**<br>• Nhà cung cấp cổng thanh toán<br>• Nhà cung cấp dịch vụ thông báo | **Quản lý chặt chẽ (Manage Closely)**<br>• Ban lãnh đạo / Ban giám đốc<br>• Nhóm phát triển (Development Team)<br>• Business Analyst (BA) |
-| **Quyền lực thấp<br>(Low Power)** | **Theo dõi (Monitor)**<br>*(Hiện chưa có đối tượng nổi bật ở nhóm này trong phạm vi tài liệu)* | **Cung cấp thông tin (Keep Informed)**<br>• Khách hàng<br>• Tài xế<br>• Nhân viên vận hành |
+# B1. Xác định Stakeholder
 
-**Chi tiết chiến lược tiếp cận từng nhóm:**
+## 1. Danh sách Stakeholder
 
-* **Quản lý chặt chẽ (High Power - High Interest):** Đây là nhóm quyết định sự thành bại của dự án. Ban lãnh đạo cần duyệt yêu cầu, ngân sách và theo dõi tiến độ. BA và Dev Team là nòng cốt thực thi, cần tương tác liên tục, họp bàn giao và giải quyết vấn đề kỹ thuật/nghiệp vụ hàng ngày.
-* **Giữ hài lòng (High Power - Low Interest):** Các đối tác cung cấp API (thanh toán, thông báo) không quan tâm nhiều đến chiến lược kinh doanh của CAB, nhưng hệ thống phụ thuộc hoàn toàn vào dịch vụ của họ. Cần tuân thủ đúng tài liệu kỹ thuật (guidelines) của họ và duy trì kết nối ổn định.
-* **Cung cấp thông tin (Low Power - High Interest):** Khách hàng, tài xế và nhân viên vận hành bị ảnh hưởng trực tiếp bởi hệ thống mới nhưng không có quyền quyết định tính năng. Cần thu thập ý kiến, đào tạo sử dụng và cập nhật thông báo rõ ràng cho họ khi hệ thống ra mắt.
-* **Theo dõi (Low Power - Low Interest):** Giám sát tối thiểu. Trong tương lai có thể là các cơ quan quản lý giao thông địa phương nếu họ yêu cầu báo cáo định kỳ nhưng chưa có tác động trực tiếp ở giai đoạn hiện tại.
+| Tên Stakeholder | Vai trò |
+|---|---|
+| **Khách hàng** | Người sử dụng CAB System để đăng ký tài khoản, cập nhật thông tin, tạo yêu cầu đặt xe, lựa chọn xe/tài xế và theo dõi chuyến |
+| **Tài xế** | Người nhận và thực hiện chuyến; quản lý hồ sơ, phương tiện và trạng thái sẵn sàng |
+| **Nhân viên vận hành** | Quản lý thông tin khách hàng, tài xế, phương tiện và hỗ trợ các trường hợp phát sinh |
+| **Ban lãnh đạo / Quản lý doanh nghiệp** | Đưa ra mục tiêu kinh doanh, kiểm soát hoạt động và định hướng phát triển hệ thống |
+| **Nhà cung cấp thanh toán** | Hệ thống bên ngoài hỗ trợ thanh toán điện tử; thuộc phạm vi tương lai, chưa phải trọng tâm MVP |
+| **Nhà cung cấp thông báo** | Cung cấp kênh gửi thông báo; hỗ trợ khả năng mở rộng trong tương lai |
+| **Business Analyst (BA)** | Thu thập, phân tích, làm rõ và chuyển đổi yêu cầu khách hàng thành yêu cầu nghiệp vụ/chức năng |
+| **Nhóm phát triển** | Xây dựng hệ thống dựa trên yêu cầu đã được phân tích và phê duyệt |
+| **Tester/QA** | Kiểm tra hệ thống dựa trên FR và AC; giai đoạn hiện tại chưa triển khai Test Case |
 
-**Biểu đồ Ma trận Stakeholder (Mermaid Quadrant Chart)**
+Tài liệu gốc đặc biệt xác định **khách hàng, tài xế và nhân viên vận hành** là ba nhóm người dùng chính. fileciteturn0file0L11-L16
+
+---
+
+# B2. Stakeholder Matrix
+
+## 1. Ma trận Power – Interest
+
+| Stakeholder | Power | Interest | Nhóm |
+|---|---:|---:|---|
+| Ban lãnh đạo | Cao | Cao | **Manage Closely** |
+| Nhân viên vận hành | Cao | Cao | **Manage Closely** |
+| Khách hàng | Thấp | Cao | **Keep Satisfied / Keep Informed** |
+| Tài xế | Thấp | Cao | **Keep Informed** |
+| BA | Cao | Cao | **Manage Closely** |
+| Nhóm phát triển | Trung bình | Cao | **Keep Informed** |
+| Tester/QA | Trung bình | Trung bình | **Keep Informed** |
+| Nhà cung cấp thanh toán | Trung bình | Thấp | **Monitor** |
+| Nhà cung cấp thông báo | Trung bình | Thấp | **Monitor** |
+
+## 2. Mermaid Stakeholder Matrix
 
 ```mermaid
 quadrantChart
-    title Ma trận Stakeholder (Power/Interest) - Nền tảng CAB
-    x-axis Mức độ quan tâm thấp --> Mức độ quan tâm cao
-    y-axis Quyền lực thấp --> Quyền lực cao
-    quadrant-1 Quản lý chặt chẽ
-    quadrant-2 Giữ hài lòng
-    quadrant-3 Theo dõi
-    quadrant-4 Cung cấp thông tin
-    Ban lãnh đạo: [0.85, 0.90]
-    Business Analyst: [0.80, 0.80]
-    Nhóm phát triển: [0.90, 0.75]
-    Cổng thanh toán: [0.25, 0.85]
-    Dịch vụ thông báo: [0.35, 0.75]
-    Khách hàng: [0.90, 0.30]
-    Tài xế: [0.85, 0.20]
-    Nhân viên vận hành: [0.70, 0.35]
+    title Stakeholder Power - Interest Matrix
+    x-axis Low Interest --> High Interest
+    y-axis Low Power --> High Power
+
+    quadrant-1 Manage Closely
+    quadrant-2 Keep Satisfied
+    quadrant-3 Monitor
+    quadrant-4 Keep Informed
+
+    "Ban lãnh đạo": [0.85, 0.90]
+    "Nhân viên vận hành": [0.90, 0.80]
+    "BA": [0.95, 0.90]
+    "Khách hàng": [0.90, 0.30]
+    "Tài xế": [0.85, 0.30]
+    "Nhóm phát triển": [0.75, 0.50]
+    "Tester/QA": [0.65, 0.40]
+    "Payment Provider": [0.30, 0.45]
+    "Notification Provider": [0.25, 0.35]
 ```
 
-# Business Rules – CAB System MVP
+> **Nhận xét:** Nhóm cần BA quan tâm cao nhất là **Ban lãnh đạo – Nhân viên vận hành – Khách hàng – Tài xế**, vì đây là những bên trực tiếp quyết định hoặc sử dụng hệ thống. Tài liệu cũng yêu cầu hệ thống phải hỗ trợ phối hợp giữa các bộ phận và có dữ liệu để theo dõi hoạt động. fileciteturn0file0L60-L66
 
-## 1. Quy tắc tài khoản và phân quyền
+---
 
-| Mã | Business Rule |
+# B3. Chuyển đổi yêu cầu khách hàng thành Business Goals – BR
+
+Từ yêu cầu ban đầu, có thể chuyển thành **9 Business Requirements (BR)** cho phạm vi MVP.
+
+| Mã BR | Business Requirement | Mục tiêu nghiệp vụ |
+|---|---|---|
+| **BR-01** | Quản lý tài khoản khách hàng | Cho phép khách hàng tạo và sử dụng tài khoản trên hệ thống |
+| **BR-02** | Quản lý hồ sơ khách hàng | Đảm bảo thông tin khách hàng được cập nhật và quản lý tập trung |
+| **BR-03** | Quản lý tài khoản tài xế | Cho phép hệ thống tạo và quản lý tài khoản tài xế |
+| **BR-04** | Quản lý hồ sơ và phương tiện tài xế | Quản lý thông tin tài xế và xe mà tài xế sử dụng |
+| **BR-05** | Quản lý trạng thái tài xế | Xác định tài xế có thể nhận chuyến hay không |
+| **BR-06** | Tạo yêu cầu đặt xe | Cho phép khách hàng nhập điểm đón, điểm đến và tạo yêu cầu |
+| **BR-07** | Lựa chọn xe và tài xế | Cho phép khách hàng lựa chọn tài xế và phương tiện phù hợp trong phạm vi MVP |
+| **BR-08** | Theo dõi trạng thái yêu cầu/chuyến | Cho phép khách hàng biết tình trạng xử lý yêu cầu |
+| **BR-09** | Quản lý lịch sử sử dụng dịch vụ | Lưu lại các yêu cầu/chuyến của khách hàng để tra cứu |
+
+Các BR trên được rút ra từ những yêu cầu về đăng ký, cập nhật thông tin, nhập điểm đón/điểm đến, lựa chọn loại xe, theo dõi tài xế/chuyến và lịch sử chuyến đi trong tài liệu. fileciteturn0file0L11-L16
+
+---
+
+# B4. Xác định phạm vi MVP
+## 1. Module MVP
+
+### Module 1 – Quản lý khách hàng
+
+Phạm vi:
+
+- Đăng ký tài khoản.
+- Đăng nhập.
+- Cập nhật thông tin cá nhân.
+- Tạo yêu cầu chuyến.
+- Nhập điểm đón.
+- Nhập điểm đến.
+- Lựa chọn loại xe.
+- Lựa chọn tài xế phù hợp.
+- Theo dõi trạng thái yêu cầu.
+- Xem lịch sử yêu cầu/chuyến.
+
+### Module 2 – Quản lý tài xế
+
+Phạm vi:
+
+- Tạo tài khoản tài xế.
+- Cập nhật hồ sơ tài xế.
+- Quản lý phương tiện.
+- Cập nhật trạng thái hoạt động.
+- Chuyển sang trạng thái sẵn sàng nhận chuyến.
+- Nhận yêu cầu chuyến.
+- Chấp nhận/từ chối chuyến.
+- Cập nhật trạng thái chuyến.
+
+Tài liệu yêu cầu tài xế có hồ sơ, thông tin phương tiện và trạng thái hoạt động; khi có yêu cầu phù hợp thì tài xế có thể chấp nhận hoặc từ chối. fileciteturn0file0L17-L22
+
+## 2. Ngoài phạm vi MVP
+
+| Chức năng | MVP |
 |---|---|
-| **BR-01** | Khách hàng và tài xế phải được xác thực trước khi sử dụng các chức năng yêu cầu tài khoản. |
-| **BR-02** | Chỉ người dùng có quyền phù hợp mới được thực hiện các thao tác quản trị. |
-| **BR-03** | Thông tin cá nhân của khách hàng và tài xế phải được bảo vệ. |
+| Thanh toán điện tử | ❌ |
+| Tích hợp Payment Gateway | ❌ |
+| Đánh giá tài xế | ❌ |
+| Báo cáo doanh thu | ❌ |
+| Báo cáo hiệu quả tài xế | ❌ |
+| Thuật toán matching nâng cao | ❌ |
+| Định vị tài xế theo thời gian thực | ❌ |
+| Nhiều nhà cung cấp notification | ❌ |
+| Quản lý khiếu nại nâng cao | ❌ |
+| Phân tích dữ liệu | ❌ |
+
+Lý do loại khỏi MVP là tài liệu mô tả đây là những năng lực của nền tảng CAB đầy đủ hoặc các yêu cầu phát triển về sau, trong khi MVP được giới hạn để đảm bảo hệ thống hoạt động trước. fileciteturn0file0L29-L44
 
 ---
 
-## 2. Quy tắc đặt xe
+# B5. Biến đổi thành Business Requirement doanh nghiệp cần
 
-| Mã | Business Rule |
-|---|---|
-| **BR-04** | Một yêu cầu đặt xe phải có điểm đón, điểm đến và loại xe. |
-| **BR-05** | Sau khi khách hàng gửi yêu cầu, hệ thống phải chuyển yêu cầu sang trạng thái tìm tài xế. |
-| **BR-06** | Khách hàng phải được thông báo về trạng thái xử lý yêu cầu đặt xe. |
+Ở bước này, BR được cụ thể hóa hơn thành **yêu cầu nghiệp vụ có thể dùng để xây dựng hệ thống**.
 
----
+## BR-01 – Quản lý tài khoản khách hàng
 
-## 3. Quy tắc tìm và phân công tài xế
+> Doanh nghiệp cần hệ thống cho phép khách hàng đăng ký tài khoản và đăng nhập để sử dụng các chức năng yêu cầu xác thực.
 
-| Mã | Business Rule |
-|---|---|
-| **BR-07** | Hệ thống chỉ xem xét các tài xế đang ở trạng thái sẵn sàng nhận chuyến. |
-| **BR-08** | Tài xế được lựa chọn phải phù hợp với loại xe mà khách hàng yêu cầu. |
-| **BR-09** | Hệ thống phải ưu tiên tài xế phù hợp và gần điểm đón của khách hàng. |
-| **BR-10** | Nếu tài xế được đề xuất không phản hồi hoặc từ chối chuyến, hệ thống phải tiếp tục tìm tài xế khác. |
-| **BR-11** | Nếu không tìm được tài xế phù hợp, hệ thống phải thông báo cho khách hàng. |
-| **BR-12** | Khi tài xế chấp nhận chuyến, hệ thống phải ghi nhận tài xế được phân công cho chuyến đó. |
+## BR-02 – Quản lý hồ sơ khách hàng
 
----
+> Doanh nghiệp cần hệ thống cho phép khách hàng xem và cập nhật thông tin cá nhân.
 
-## 4. Quy tắc thực hiện chuyến
+## BR-03 – Quản lý tài khoản tài xế
 
-| Mã | Business Rule |
-|---|---|
-| **BR-13** | Tài xế phải cập nhật trạng thái chuyến trong quá trình thực hiện. |
-| **BR-14** | Các trạng thái chính của chuyến gồm: tìm tài xế, đã phân công tài xế, tài xế đến điểm đón, đã đón khách, đang di chuyển và hoàn thành. |
-| **BR-15** | Khi chuyến hoàn thành, hệ thống phải ghi nhận thông tin chuyến để phục vụ tính cước, thanh toán và lưu lịch sử. |
-| **BR-16** | Hệ thống phải lưu thông tin vị trí của tài xế để hỗ trợ tìm tài xế và dự kiến thời gian đến. |
+> Doanh nghiệp cần hệ thống cho phép tạo và quản lý tài khoản tài xế.
 
----
+## BR-04 – Quản lý tài xế và phương tiện
 
-## 5. Quy tắc tính cước và thanh toán
+> Doanh nghiệp cần quản lý thông tin cá nhân của tài xế và thông tin phương tiện mà tài xế sử dụng.
 
-| Mã | Business Rule |
-|---|---|
-| **BR-17** | Sau khi chuyến hoàn thành, hệ thống phải xác định số tiền khách hàng phải trả dựa trên loại dịch vụ và thông tin chuyến đi. |
-| **BR-18** | Khách hàng được phép thanh toán bằng tiền mặt hoặc phương thức thanh toán điện tử được hệ thống hỗ trợ. |
-| **BR-19** | Thông tin nhạy cảm của thẻ hoặc tài khoản thanh toán không được lưu trực tiếp trong hệ thống CAB. |
-| **BR-20** | Thanh toán điện tử phải được xử lý thông qua nhà cung cấp dịch vụ thanh toán bên ngoài. |
-| **BR-21** | Khi thanh toán điện tử thất bại, hệ thống phải thông báo cho khách hàng và cho phép xử lý lại theo chính sách của doanh nghiệp. |
+## BR-05 – Quản lý trạng thái tài xế
 
----
+> Doanh nghiệp cần biết tài xế nào đang sẵn sàng nhận chuyến để cung cấp danh sách tài xế có thể lựa chọn.
 
-## 6. Quy tắc thông báo
+## BR-06 – Tạo yêu cầu đặt xe
 
-| Mã | Business Rule |
-|---|---|
-| **BR-22** | Khách hàng phải được thông báo khi yêu cầu đặt xe được tiếp nhận. |
-| **BR-23** | Khách hàng phải được thông báo khi tài xế nhận chuyến. |
-| **BR-24** | Khách hàng phải được thông báo khi tài xế đến điểm đón. |
-| **BR-25** | Khách hàng phải được thông báo khi chuyến xe hoàn thành và khi thanh toán có kết quả. |
-| **BR-26** | Tài xế phải được thông báo khi có chuyến mới hoặc có thay đổi liên quan đến chuyến đang thực hiện. |
+> Khách hàng cần nhập điểm đón và điểm đến, sau đó tạo yêu cầu đặt xe trên hệ thống.
 
----
+## BR-07 – Lựa chọn xe và tài xế
 
-## 7. Quy tắc vận hành
+> Khách hàng cần được xem danh sách **xe/tài xế đang phù hợp và sẵn sàng**, sau đó lựa chọn tài xế và phương tiện để thực hiện chuyến.
+Trong MVP, **không cần đánh giá tài xế tốt/xấu hoặc xây dựng thuật toán xếp hạng phức tạp**. Mục tiêu trước mắt là bảo đảm hệ thống có thể cung cấp danh sách tài xế/xe khả dụng và thực hiện được việc lựa chọn.
 
-| Mã | Business Rule |
-|---|---|
-| **BR-27** | Nhân viên vận hành được phép theo dõi các chuyến đang diễn ra và trạng thái tài xế theo quyền được cấp. |
-| **BR-28** | Nhân viên vận hành được phép hỗ trợ xử lý các trường hợp chuyến bị lỗi theo chính sách của doanh nghiệp. |
-| **BR-29** | Các thao tác quản trị quan trọng phải được lưu vết để phục vụ kiểm tra và xử lý sự cố. |
+## BR-08 – Theo dõi trạng thái
+
+> Khách hàng cần xem trạng thái xử lý của yêu cầu sau khi đặt xe.
+
+Ví dụ:
+
+```text
+Đã tạo yêu cầu
+      ↓
+Đang chờ tài xế
+      ↓
+Đã có tài xế
+      ↓
+Đang thực hiện
+      ↓
+Hoàn thành
+```
+
+Tài liệu cũng yêu cầu khách hàng biết hệ thống đang tìm tài xế, tài xế nào nhận chuyến và trạng thái hiện tại. fileciteturn0file0L13-L16
+
+## BR-09 – Lịch sử chuyến
+
+> Doanh nghiệp cần lưu thông tin yêu cầu/chuyến để khách hàng có thể tra cứu lịch sử sử dụng.
 
 ---
 
-# Business Rules cần xác nhận
+# B6. Mô hình hóa nghiệp vụ
 
-Các quy tắc dưới đây chưa được xác định cụ thể trong yêu cầu hiện tại. Cần trao đổi với khách hàng hoặc Ban giám đốc trước khi triển khai chính thức.
+Vì có **9 BR**, ta xây dựng **9 quy trình nghiệp vụ tương ứng**.
 
-| Mã | Nội dung cần xác nhận |
-|---|---|
-| **BR-Q01** | Bán kính tối đa để hệ thống tìm kiếm tài xế là bao nhiêu? |
-| **BR-Q02** | Tài xế có bao nhiêu thời gian để phản hồi yêu cầu chuyến? |
-| **BR-Q03** | Sau khi tài xế từ chối hoặc không phản hồi, hệ thống chuyển sang tài xế tiếp theo sau bao lâu? |
-| **BR-Q04** | Ngoài khoảng cách, hệ thống có tiêu chí nào khác để ưu tiên tài xế không? |
-| **BR-Q05** | Công thức tính cước chuyến xe cụ thể là gì? |
-| **BR-Q06** | Có áp dụng phụ phí theo thời điểm, quãng đường, loại xe hoặc điều kiện khác không? |
-| **BR-Q07** | Khách hàng có được phép hủy chuyến không và có phát sinh phí hủy không? |
-| **BR-Q08** | Nếu tài xế hủy chuyến sau khi đã nhận, hệ thống có tự động tìm tài xế khác không? |
-| **BR-Q09** | Khi thanh toán điện tử thất bại, khách hàng được phép thanh toán lại bao nhiêu lần? |
-| **BR-Q10** | Khi mất kết nối mạng hoặc GPS, hệ thống xử lý trạng thái chuyến và vị trí tài xế như thế nào? |
-
----
-
-# Tổng kết Business Rules
-
-| Loại | Số lượng | Phạm vi |
-|---|---:|---|
-| Business Rules chính thức | **29** | Sử dụng cho MVP |
-| Business Rules cần xác nhận | **10** | Cần thống nhất với khách hàng |
-| **Tổng cộng** | **39** | Bao gồm cả nội dung cần xác nhận |
-
-> **Lưu ý:** BR-Q01 đến BR-Q10 chưa được xem là Business Rule chính thức của hệ thống. Sau khi khách hàng xác nhận, các nội dung này mới được chuẩn hóa thành Business Rule chính thức và đánh số lại nếu cần.
-
-**Module Quản lý Khách hàng (MVP)**
-* **Xác thực cơ bản:** Đăng ký và đăng nhập nhanh bằng số điện thoại.
-* **Đặt xe (Luồng cốt lõi):** Cho phép nhập điểm đón và điểm đến qua API bản đồ; hệ thống hiển thị cước phí dự kiến dựa trên công thức tĩnh (tổng quãng đường x đơn giá).
-* **Theo dõi hành trình:** Cập nhật theo thời gian thực 4 trạng thái chính yếu: Đang tìm tài xế $\rightarrow$ Tài xế đang đến $\rightarrow$ Đang di chuyển $\rightarrow$ Hoàn thành.
-* **Thanh toán tối giản:** Triển khai thanh toán bằng tiền mặt (Cash) và tối đa một cổng thanh toán điện tử cơ bản để ghi nhận luồng tiền.
-* **Ngoài phạm vi MVP (Out of scope):** Đánh giá tài xế, lưu địa chỉ yêu thích, mã khuyến mãi, phân hạng thành viên.
-
-**Module Quản lý Tài xế (MVP)**
-* **Quản lý hồ sơ tối giản:** Bỏ qua quy trình tự đăng ký phức tạp. Tài khoản tài xế có thể do nhân viên vận hành tạo và cấp quyền trực tiếp để nhanh chóng đưa vào hoạt động.
-* **Cập nhật trạng thái làm việc:** Cung cấp duy nhất nút bật/tắt trạng thái sẵn sàng (Online/Offline) và liên tục gửi tọa độ GPS về hệ thống.
-* **Thuật toán phân công (Dispatching) cơ bản:** Sử dụng cơ chế tìm kiếm theo bán kính địa lý gần nhất (ví dụ: quét các tài xế trống trong bán kính 2km) hoặc cơ chế Broadcast (phát đồng loạt). Bỏ qua hoàn toàn các tham số ưu tiên về tỷ lệ nhận chuyến, điểm đánh giá hay thâm niên.
-* **Thực thi chuyến đi:** Giao diện thao tác một chạm để tài xế cập nhật luồng trạng thái: Chấp nhận chuyến $\rightarrow$ Đã đến điểm đón $\rightarrow$ Bắt đầu hành trình $\rightarrow$ Kết thúc chuyến.
-* **Ngoài phạm vi MVP (Out of scope):** Điểm đánh giá (Rating), hệ thống thưởng/phạt (Penalty), ví nội bộ phức tạp, xem thống kê hiệu suất tài xế.
-
-**Danh sách Yêu cầu Nghiệp vụ (Business Requirements) - Lựa chọn Xe & Tài xế (MVP)**
-
-| Mã BR | Hạng mục | Mô tả yêu cầu cho giai đoạn MVP |
-| :--- | :--- | :--- |
-| **BR-01** | **Lựa chọn loại phương tiện cơ bản** | Khách hàng chỉ được cung cấp các tùy chọn phân loại xe thiết yếu nhất để đáp ứng nhu cầu vận chuyển (ví dụ: Xe 4 chỗ tiêu chuẩn, Xe 7 chỗ tiêu chuẩn). Hệ thống không xử lý các bộ lọc phức tạp (xe hạng sang, xe điện, xe ghép) nhằm đơn giản hóa công thức tính cước và logic tìm kiếm. |
-| **BR-02** | **Cơ chế ghép nối tài xế tự động** | Để đảm bảo hệ thống vận hành trơn tru và nhanh chóng, khách hàng không tự lướt danh sách để chọn tài xế. Hệ thống sẽ tự động quét và chỉ định tài xế đang ở trạng thái "Sẵn sàng" có vị trí địa lý gần điểm đón nhất. |
-| **BR-03** | **Hiển thị thông tin tài xế rút gọn** | Sau khi hệ thống ghép nối thành công, giao diện khách hàng chỉ hiển thị các thông tin định danh bắt buộc: Tên tài xế, số điện thoại, biển số xe và vị trí GPS trên bản đồ. Không thu thập, không tính toán và không hiển thị các dữ liệu đánh giá chất lượng (Rating, thâm niên, số huy hiệu). |
-| **BR-04** | **Tự động xử lý luồng từ chối chuyến** | Nếu tài xế được hệ thống lựa chọn từ chối yêu cầu hoặc không phản hồi trong thời gian quy định (ví dụ: 15 giây), hệ thống tự động chuyển yêu cầu đặt xe tới tài xế gần thứ hai. Khách hàng không cần thao tác chọn lại xe hay tạo lại cuốc xe từ đầu. |
-
-**B5: Yêu cầu Nghiệp vụ (Business Requirements) - Chức năng Lựa chọn Xe & Tài xế (Giai đoạn MVP)**
-
-| Mã BR | Tên yêu cầu | Mô tả chi tiết (Theo tiêu chuẩn MVP) |
-| :--- | :--- | :--- |
-| **BR-01** | **Lựa chọn loại phương tiện (Vehicle Selection)** | Khách hàng được yêu cầu chọn loại dịch vụ/phương tiện cơ bản trước khi xác nhận đặt chuyến (ví dụ: CAB 4 chỗ, CAB 7 chỗ hoặc CAB Moto). Các bộ lọc nâng cao như xe hạng sang, xe tiện chuyến, hoặc yêu cầu tài xế nữ sẽ không đưa vào phạm vi MVP để tối giản hệ thống. |
-| **BR-02** | **Cơ chế chỉ định tài xế tự động (Auto-Dispatching)** | Khách hàng không được chọn thủ công tài xế từ một danh sách. Để đảm bảo thời gian đáp ứng nhanh nhất, hệ thống tự động tìm kiếm và phân công tài xế đang ở trạng thái "Sẵn sàng" và có vị trí địa lý gần điểm đón nhất. |
-| **BR-03** | **Cung cấp thông tin nhận diện (Driver/Vehicle Info)** | Khi hệ thống ghép nối thành công, màn hình ứng dụng của khách hàng chỉ hiển thị các thông tin định danh bắt buộc để nhận xe: Tên tài xế, Số điện thoại (để liên lạc), Biển số xe, Loại xe và Vị trí hiện tại trên bản đồ. Các thông tin về điểm đánh giá (Rating) hay số chuyến đã hoàn thành bị loại bỏ khỏi MVP. |
-| **BR-04** | **Luồng tìm kiếm tài xế thay thế (Re-routing)** | Trong trường hợp tài xế được hệ thống chỉ định từ chối chuyến hoặc không phản hồi quá thời gian quy định (ví dụ 15-30 giây), hệ thống phải tự động lặp lại quá trình phân công cho tài xế gần thứ hai. Khách hàng chỉ thấy trạng thái "Đang tìm tài xế" và không phải thao tác đặt lại. |
-| **BR-05** | **Thông báo hết xe (No Driver Available)** | Nếu hệ thống đã mở rộng bán kính tìm kiếm tối đa (theo quy định của doanh nghiệp) mà vẫn không có tài xế nào tiếp nhận, hệ thống phải thông báo rõ ràng cho khách hàng: "Hiện tại không có tài xế phù hợp, vui lòng thử lại sau" và kết thúc yêu cầu để giải phóng luồng xử lý. |
-
-**Mô hình hóa quy trình nghiệp vụ (Business Process Model) - Luồng Đặt xe MVP**
-
-**1. Bảng mô tả luồng quy trình (Process Flow Description)**
-
-| Bước | Tác nhân | Thao tác / Xử lý | Mã BR đối chiếu |
-| :--- | :--- | :--- | :--- |
-| 1 | Khách hàng | Nhập điểm đón, điểm đến và lựa chọn loại phương tiện (4 chỗ, 7 chỗ...). | BR-01 |
-| 2 | Hệ thống | Tính toán cước phí dự kiến dựa trên quãng đường và hiển thị cho khách hàng. | |
-| 3 | Khách hàng | Xác nhận "Đặt xe". | |
-| 4 | Hệ thống | Chuyển trạng thái "Đang tìm tài xế". Quét tọa độ GPS, xác định tài xế Online gần nhất phù hợp với loại xe. | BR-02 |
-| 5 | Hệ thống | Gửi thông báo yêu cầu nhận chuyến đến Ứng dụng của Tài xế được chọn. | BR-02 |
-| 6 | Tài xế | Nhận thông báo và có khoảng thời gian giới hạn (VD: 15s) để "Chấp nhận" hoặc "Từ chối". | |
-| 7a | Hệ thống | **Ngoại lệ (Từ chối/Timeout):** Tự động bỏ qua tài xế hiện tại, lặp lại Bước 4 để tìm tài xế gần thứ 2. | BR-04 |
-| 7b | Hệ thống | **Ngoại lệ (Hết xe):** Nếu vượt quá số lần quét hoặc giới hạn bán kính, gửi thông báo "Không có tài xế" cho khách và kết thúc luồng. | BR-05 |
-| 8 | Hệ thống | **Luồng chính (Chấp nhận):** Khóa cuốc xe cho tài xế này. Gửi thông tin định danh (Tên, SĐT, Biển số, Loại xe) và vị trí tài xế sang cho Khách hàng. | BR-03 |
-| 9 | Tài xế | Di chuyển đến điểm đón. Bấm xác nhận "Đã đến điểm đón" trên ứng dụng. | |
-| 10 | Tài xế | Khách lên xe. Bấm xác nhận "Bắt đầu chuyến đi". | |
-| 11 | Tài xế | Đến điểm trả khách. Bấm xác nhận "Hoàn thành chuyến đi". | |
-| 12 | Hệ thống | Ghi nhận trạng thái hoàn thành. Hiển thị tổng tiền cần thanh toán cho cả Khách hàng và Tài xế để thực hiện giao dịch (tiền mặt/chuyển khoản). | |
-
----
-
-**2. Sơ đồ luồng nghiệp vụ (BPMN / Flowchart bằng Mermaid)**
+## Quy trình BR-01 – Đăng ký tài khoản khách hàng
 
 ```mermaid
 flowchart TD
-    %% Tác nhân: Khách hàng (C), Hệ thống (S), Tài xế (D)
-    Start([Khách hàng mở App]) --> C1(Nhập điểm đón, điểm đến)
-    C1 --> C2(Chọn loại xe - BR-01)
-    C2 --> S1(Hệ thống tính và hiển thị giá)
-    S1 --> C3{Khách bấm Đặt xe?}
-    C3 -- Hủy --> End1([Kết thúc])
-    C3 -- Xác nhận --> S2(Hệ thống quét tài xế gần nhất - BR-02)
-    
-    S2 --> S3(Phát cuốc cho Tài xế 1)
-    S3 --> D1{Tài xế phản hồi?}
-    
-    D1 -- Từ chối / Quá giờ --> S4{Còn tài xế trong bán kính?}
-    S4 -- Còn --> S2_loop(Hệ thống quét tài xế gần thứ N - BR-04)
-    S2_loop --> S3
-    S4 -- Không còn --> S5(Thông báo hết xe - BR-05)
-    S5 --> End2([Hủy cuốc tự động])
-    
-    D1 -- Chấp nhận --> S6(Ghép nối thành công. Hiển thị thông tin TX - BR-03)
-    S6 --> D2(Tài xế di chuyển đến điểm đón)
-    D2 --> D3(Tài xế xác nhận: Đã đến)
-    D3 --> D4(Tài xế xác nhận: Bắt đầu chuyến)
-    D4 --> D5(Tài xế xác nhận: Hoàn thành chuyến)
-    D5 --> S7(Hệ thống ghi nhận hoàn thành & Tính cước cuối)
-    S7 --> End3([Thanh toán & Kết thúc])
-    
-    %% Style
-    classDef system fill:#f9f,stroke:#333,stroke-width:2px;
-    class S1,S2,S2_loop,S3,S4,S5,S6,S7 system;
-
-# Tài liệu Phân tích Nghiệp vụ (BA) - Nền tảng Đặt xe CAB (Giai đoạn MVP)
-
-## 1. Danh sách Stakeholders (Các bên liên quan)
-
-| Tên | Vai trò |
-| :--- | :--- |
-| **Ban lãnh đạo / Ban giám đốc** | Người ra quyết định chiến lược và đầu tư nền tảng. Có nhu cầu xem báo cáo tổng quan và định hướng mở rộng hệ thống. |
-| **Khách hàng** | Người dùng cuối sử dụng hệ thống để tạo yêu cầu đặt xe, theo dõi hành trình và thanh toán cước phí. |
-| **Tài xế** | Đối tác cung cấp dịch vụ vận chuyển. Sử dụng ứng dụng để nhận yêu cầu đặt xe, cập nhật trạng thái chuyến đi và chia sẻ vị trí. |
-| **Nhân viên vận hành** | Quản lý dữ liệu hệ thống (khách hàng, tài xế, phương tiện). Giám sát các chuyến đi đang diễn ra và hỗ trợ xử lý ngoại lệ. |
-| **Business Analyst (BA)** | Người phân tích và thiết kế hệ thống. Chịu trách nhiệm xác định phạm vi, quy trình nghiệp vụ và các yêu cầu chức năng/phi chức năng. |
-| **Nhóm phát triển (Dev Team)** | Chịu trách nhiệm thiết kế kiến trúc kỹ thuật và lập trình xây dựng nền tảng CAB dựa trên các yêu cầu đã phân tích. |
-| **Cổng thanh toán (Bên thứ 3)** | Đối tác xử lý các giao dịch thanh toán điện tử, đảm bảo tính bảo mật. |
-| **Dịch vụ thông báo (Bên thứ 3)** | Hệ thống bên ngoài hỗ trợ gửi các cập nhật thời gian thực tới thiết bị của khách hàng và tài xế. |
+    A[Khách hàng] --> B[Nhập thông tin đăng ký]
+    B --> C{Thông tin hợp lệ?}
+    C -->|Không| D[Thông báo lỗi]
+    D --> B
+    C -->|Có| E[Tạo tài khoản]
+    E --> F[Thông báo đăng ký thành công]
+```
 
 ---
 
-## 2. Ma trận Stakeholder (Power/Interest Grid)
-
-| | Mức độ quan tâm thấp (Low Interest) | Mức độ quan tâm cao (High Interest) |
-| :--- | :--- | :--- |
-| **Quyền lực cao<br>(High Power)** | **Giữ hài lòng (Keep Satisfied)**<br>• Cổng thanh toán<br>• Dịch vụ thông báo | **Quản lý chặt chẽ (Manage Closely)**<br>• Ban lãnh đạo / Ban giám đốc<br>• Nhóm phát triển (Dev Team)<br>• Business Analyst (BA) |
-| **Quyền lực thấp<br>(Low Power)** | **Theo dõi (Monitor)**<br>*(Chưa có đối tượng nổi bật)* | **Cung cấp thông tin (Keep Informed)**<br>• Khách hàng<br>• Tài xế<br>• Nhân viên vận hành |
+## Quy trình BR-02 – Cập nhật hồ sơ khách hàng
 
 ```mermaid
-quadrantChart
-    title Ma trận Stakeholder (Power/Interest) - Nền tảng CAB
-    x-axis Mức độ quan tâm thấp --> Mức độ quan tâm cao
-    y-axis Quyền lực thấp --> Quyền lực cao
-    quadrant-1 Quản lý chặt chẽ
-    quadrant-2 Giữ hài lòng
-    quadrant-3 Theo dõi
-    quadrant-4 Cung cấp thông tin
-    Ban lãnh đạo: [0.85, 0.90]
-    Business Analyst: [0.80, 0.80]
-    Nhóm phát triển: [0.90, 0.75]
-    Cổng thanh toán: [0.25, 0.85]
-    Dịch vụ thông báo: [0.35, 0.75]
-    Khách hàng: [0.90, 0.30]
-    Tài xế: [0.85, 0.20]
-    Nhân viên vận hành: [0.70, 0.35]
-
-# Tài liệu Phân tích Nghiệp vụ (BA) - Nền tảng Đặt xe CAB (Giai đoạn MVP)
-
-## 1. Danh sách Stakeholders (Các bên liên quan)
-
-| Tên | Vai trò |
-| :--- | :--- |
-| **Ban lãnh đạo / Ban giám đốc** | Người ra quyết định chiến lược và đầu tư nền tảng. Có nhu cầu xem báo cáo tổng quan và định hướng mở rộng hệ thống. |
-| **Khách hàng** | Người dùng cuối sử dụng hệ thống để tạo yêu cầu đặt xe, theo dõi hành trình và thanh toán cước phí. |
-| **Tài xế** | Đối tác cung cấp dịch vụ vận chuyển. Sử dụng ứng dụng để nhận yêu cầu đặt xe, cập nhật trạng thái chuyến đi và chia sẻ vị trí. |
-| **Nhân viên vận hành** | Quản lý dữ liệu hệ thống (khách hàng, tài xế, phương tiện). Giám sát các chuyến đi đang diễn ra và hỗ trợ xử lý ngoại lệ. |
-| **Business Analyst (BA)** | Người phân tích và thiết kế hệ thống. Chịu trách nhiệm xác định phạm vi, quy trình nghiệp vụ và các yêu cầu chức năng/phi chức năng. |
-| **Nhóm phát triển (Dev Team)** | Chịu trách nhiệm thiết kế kiến trúc kỹ thuật và lập trình xây dựng nền tảng CAB dựa trên các yêu cầu đã phân tích. |
-| **Cổng thanh toán (Bên thứ 3)** | Đối tác xử lý các giao dịch thanh toán điện tử, đảm bảo tính bảo mật. |
-| **Dịch vụ thông báo (Bên thứ 3)** | Hệ thống bên ngoài hỗ trợ gửi các cập nhật thời gian thực tới thiết bị của khách hàng và tài xế. |
+flowchart TD
+    A[Khách hàng đăng nhập] --> B[Xem hồ sơ]
+    B --> C[Chỉnh sửa thông tin]
+    C --> D{Thông tin hợp lệ?}
+    D -->|Không| E[Thông báo lỗi]
+    E --> C
+    D -->|Có| F[Lưu thông tin]
+    F --> G[Thông báo thành công]
+```
 
 ---
 
-Lỗi hiển thị trong ảnh của bạn xảy ra vì bảng Markdown bị tràn dòng hoặc các thẻ `<br>` bị dính liền làm hỏng cấu trúc cột. 
-
-Dưới đây là phiên bản đã sửa lại định dạng bảng Markdown cho gọn gàng, không bị lỗi xuống dòng, kèm theo toàn bộ tài liệu chuẩn để bạn copy:
-
-# Tài liệu Phân tích Nghiệp vụ (BA) - Nền tảng Đặt xe CAB (Giai đoạn MVP)
-
-## 1. Danh sách Stakeholders (Các bên liên quan)
-
-| Tên | Vai trò |
-| :--- | :--- |
-| **Ban lãnh đạo / Ban giám đốc** | Người ra quyết định chiến lược và đầu tư nền tảng. Có nhu cầu xem báo cáo tổng quan và định hướng mở rộng hệ thống. |
-| **Khách hàng** | Người dùng cuối sử dụng hệ thống để tạo yêu cầu đặt xe, theo dõi hành trình và thanh toán cước phí. |
-| **Tài xế** | Đối tác cung cấp dịch vụ vận chuyển. Sử dụng ứng dụng để nhận yêu cầu đặt xe, cập nhật trạng thái chuyến đi và chia sẻ vị trí. |
-| **Nhân viên vận hành** | Quản lý dữ liệu hệ thống (khách hàng, tài xế, phương tiện). Giám sát các chuyến đi đang diễn ra và hỗ trợ xử lý ngoại lệ. |
-| **Business Analyst (BA)** | Người phân tích và thiết kế hệ thống. Chịu trách nhiệm xác định phạm vi, quy trình nghiệp vụ và các yêu cầu chức năng/phi chức năng. |
-| **Nhóm phát triển (Dev Team)** | Chịu trách nhiệm thiết kế kiến trúc kỹ thuật và lập trình xây dựng nền tảng CAB dựa trên các yêu cầu đã phân tích. |
-| **Cổng thanh toán (Bên thứ 3)** | Đối tác xử lý các giao dịch thanh toán điện tử, đảm bảo tính bảo mật. |
-| **Dịch vụ thông báo (Bên thứ 3)** | Hệ thống bên ngoài hỗ trợ gửi các cập nhật thời gian thực tới thiết bị của khách hàng và tài xế. |
-
----
-
-## 2. Ma trận Stakeholder (Power/Interest Grid)
-
-| Nhóm quyền lực / quan tâm | Mức độ quan tâm thấp (Low Interest) | Mức độ quan tâm cao (High Interest) |
-| :--- | :--- | :--- |
-| **Quyền lực cao (High Power)** | **Giữ hài lòng (Keep Satisfied)**<br>• Cổng thanh toán<br>• Dịch vụ thông báo | **Quản lý chặt chẽ (Manage Closely)**<br>• Ban lãnh đạo / Ban giám đốc<br>• Nhóm phát triển (Dev Team)<br>• Business Analyst (BA) |
-| **Quyền lực thấp (Low Power)** | **Theo dõi (Monitor)**<br>• *(Chưa có đối tượng nổi bật)* | **Cung cấp thông tin (Keep Informed)**<br>• Khách hàng<br>• Tài xế<br>• Nhân viên vận hành |
+## Quy trình BR-03 – Tạo tài khoản tài xế
 
 ```mermaid
-quadrantChart
-    title Ma trận Stakeholder (Power/Interest) - Nền tảng CAB
-    x-axis Mức độ quan tâm thấp --> Mức độ quan tâm cao
-    y-axis Quyền lực thấp --> Quyền lực cao
-    quadrant-1 Quản lý chặt chẽ
-    quadrant-2 Giữ hài lòng
-    quadrant-3 Theo dõi
-    quadrant-4 Cung cấp thông tin
-    Ban lãnh đạo: [0.85, 0.90]
-    Business Analyst: [0.80, 0.80]
-    Nhóm phát triển: [0.90, 0.75]
-    Cổng thanh toán: [0.25, 0.85]
-    Dịch vụ thông báo: [0.35, 0.75]
-    Khách hàng: [0.90, 0.30]
-    Tài xế: [0.85, 0.20]
-    Nhân viên vận hành: [0.70, 0.35]
+flowchart TD
+    A[Nhân viên vận hành] --> B[Nhập thông tin tài xế]
+    B --> C{Thông tin hợp lệ?}
+    C -->|Không| D[Thông báo lỗi]
+    D --> B
+    C -->|Có| E[Tạo tài khoản]
+    E --> F[Tài xế có tài khoản]
+```
 
-# Yêu cầu Phi chức năng (Non-Functional Requirements - NFR) - Nền tảng CAB (Giai đoạn MVP)
-
-Dựa trên bối cảnh và định hướng phát triển của doanh nghiệp, các yêu cầu phi chức năng dành cho giai đoạn MVP được quy định như sau:
-
-## 1. Hiệu năng và Khả năng đáp ứng (Performance & Scalability)
-* **NFR-01 (Thời gian phản hồi API):** Các thao tác tra cứu cơ bản, định vị bản đồ và gửi yêu cầu đặt xe phải phản hồi về giao diện ứng dụng trong vòng dưới 2 giây (điều kiện mạng 4G tiêu chuẩn).
-* **NFR-02 (Tần suất cập nhật vị trí):** Tọa độ GPS của tài xế khi ở trạng thái Online phải được đồng bộ về máy chủ liên tục với tần suất 5 giây/lần để đảm bảo tính thời gian thực (real-time) cho việc điều phối.
-* **NFR-03 (Khả năng mở rộng độc lập):** Kiến trúc hệ thống phía Backend phải được tách biệt thành các dịch vụ độc lập tối thiểu giữa module xử lý chuyến đi (Dispatching) và module thông báo, nhằm đảm bảo khi lượng truy cập tăng cao không làm sập toàn bộ hệ thống.
-
-## 2. Tính sẵn sàng và Độ tin cậy (Availability & Reliability)
-* **NFR-04 (Tính sẵn sàng của dịch vụ MVP):** Hệ thống cốt lõi (Khách hàng đặt xe và Tài xế nhận cuốc) phải đạt mức độ sẵn sàng tối thiểu 99% trong giờ cao điểm.
-* **NFR-05 (Cơ chế chịu lỗi cô lập):** Lỗi phát sinh từ một dịch vụ bên thứ ba (ví dụ: mất kết nối cổng thanh toán điện tử hoặc dịch vụ gửi thông báo push notification) tuyệt đối không được làm gián đoạn luồng cốt lõi là tạo chuyến đi và phân công tài xế.
-
-## 3. Bảo mật và An toàn dữ liệu (Security & Compliance)
-* **NFR-06 (Mã hóa đường truyền):** Toàn bộ dữ liệu truyền tải giữa ứng dụng di động (Mobile App) và máy chủ (Server) phải được mã hóa bắt buộc thông qua giao thức HTTPS / TLS 1.3.
-* **NFR-07 (Bảo mật thông tin thanh toán):** Đúng theo yêu cầu của doanh nghiệp, hệ thống CAB không được phép lưu trữ trực tiếp các thông tin nhạy cảm của thẻ ngân hàng hoặc tài khoản thanh toán điện tử trên cơ sở dữ liệu nội bộ; mọi giao dịch phải điều hướng qua bên thứ ba đạt chuẩn PCI-DSS.
-* **NFR-08 (Xác thực và phân quyền):** Mọi phiên làm việc (Session) của khách hàng và tài xế phải thông qua token định danh bảo mật sau khi xác thực OTP thành công. Các thao tác can thiệp hệ thống từ nhân viên vận hành bắt buộc phải được ghi vết (audit log).
-
-## 4. Khả năng bảo trì và Triển khai (Maintainability & Deployability)
-* **NFR-09 (Triển khai từng phần):** Hệ thống phải cho phép nhóm phát triển cập nhật hoặc vá lỗi từng module riêng biệt (như module khách hàng hoặc module tài xế) mà không bắt buộc phải dừng toàn bộ hệ thống (Zero-downtime deployment cho các bản cập nhật nhỏ).
-* **NFR-10 (Lưu trữ Nhật ký hệ thống - Logging):** Hệ thống phải ghi lại toàn bộ các sự kiện lỗi quan trọng (Error logs), lịch sử trạng thái chuyến đi và lịch sử phản hồi của tài xế trong cơ sở dữ liệu để phục vụ công tác tra cứu, giải quyết tranh chấp khi có sự cố phát sinh.
-
-# Thiết kế Mô hình Thực thể Kết hợp (Entity Relationship Diagram - ERD) - Giai đoạn MVP
-
-Dựa trên các Quy tắc Nghiệp vụ (BR) và Yêu cầu Chức năng (FR) đã xác định ở các phần trước cho nền tảng CAB (phiên bản MVP gồm Quản lý Khách hàng và Quản lý Tài xế), dưới đây là mô hình ERD với các thực thể cốt lõi, thuộc tính và mối quan hệ giữa chúng.
-
-## 1. Danh sách các Thực thể (Entities) và Thuộc tính
-
-### 1. Thực thể `Customer` (Khách hàng)
-Lưu trữ thông tin định danh tối thiểu của khách hàng sử dụng dịch vụ.
-*   `customer_id` (PK): Mã định danh khách hàng (UUID / Long).
-*   `phone_number`: Số điện thoại khách hàng (Dùng để xác thực OTP).
-*   `status`: Trạng thái tài khoản (Active, Blocked).
-*   `created_at`: Thời điểm đăng ký tài khoản.
-
-### 2. Thực thể `Driver` (Tài xế)
-Lưu trữ thông tin hồ sơ và trạng thái hoạt động của đối tác tài xế.
-*   `driver_id` (PK): Mã định danh tài xế.
-*   `phone_number`: Số điện thoại tài xế (Dùng để nhận OTP và liên lạc).
-*   `name`: Tên tài xế.
-*   `online_status`: Trạng thái làm việc hiện tại (Online / Offline) (Liên quan FR-D01).
-*   `current_latitude`: Vĩ độ GPS hiện tại của tài xế (Cập nhật realtime).
-*   `current_longitude`: Kinh độ GPS hiện tại của tài xế (Cập nhật realtime).
-*   `status`: Trạng thái tài khoản được duyệt bởi nhân viên vận hành (Pending, Active, Locked).
-
-### 3. Thực thể `Vehicle` (Phương tiện)
-Lưu trữ thông tin xe của tài xế phục vụ cho việc phân loại chuyến đi.
-*   `vehicle_id` (PK): Mã định danh phương tiện.
-*   `driver_id` (FK): Khóa ngoại liên kết tới tài xế sở hữu.
-*   `vehicle_type`: Loại phương tiện cơ bản theo BR-01 (VD: `CAR_4_SEATS`, `CAR_7_SEATS`).
-*   `license_plate`: Biển số xe (Dùng để khách hàng nhận diện).
-
-### 4. Thực thể `Trip` (Chuyến đi / Cuốc xe)
-Thực thể trung tâm lưu trữ toàn bộ vòng đời của một yêu cầu đặt xe từ lúc tạo đến khi hoàn thành.
-*   `trip_id` (PK): Mã định danh cuốc xe.
-*   `customer_id` (FK): Khách hàng tạo yêu cầu.
-*   `driver_id` (FK, Nullable): Tài xế nhận cuốc (Có thể trống nếu chưa tìm được hoặc hủy).
-*   `pickup_latitude`: Tọa độ vĩ độ điểm đón.
-*   `pickup_longitude`: Tọa độ kinh độ điểm đón.
-*   `dropoff_latitude`: Tọa độ vĩ độ điểm đến.
-*   `dropoff_longitude`: Tọa độ kinh độ điểm đến.
-*   `vehicle_type_requested`: Loại xe khách hàng yêu cầu.
-*   `estimated_fare`: Số tiền cước phí dự kiến (Tính theo công thức tĩnh).
-*   `status`: Trạng thái chuyến đi (Values: `FINDING`, `DRIVER_ARRIVING`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`).
-*   `created_at`: Thời gian tạo yêu cầu đặt xe.
-*   `completed_at`: Thời gian kết thúc chuyến đi.
+Trong tài liệu, tài xế có thể đăng ký hoặc được nhân viên vận hành tạo tài khoản. fileciteturn0file0L17-L18
 
 ---
 
-## 2. Mô tả Quan hệ giữa các Thực thể (Relationships)
+## Quy trình BR-04 – Quản lý hồ sơ và phương tiện
 
-| Thực thể A | Mối quan hệ (Cardinality) | Thực thể B | Mô tả ý nghĩa liên kết |
-| :--- | :---: | :--- | :--- |
-| **Customer** | `1 : N` | **Trip** | Một khách hàng có thể tạo nhiều chuyến đi trong lịch sử, nhưng một chuyến đi thuộc về duy nhất một khách hàng. |
-| **Driver** | `1 : 1` | **Vehicle** | Ở giai đoạn MVP tối giản, mỗi tài xế quản lý và gắn liền với duy nhất một phương tiện hoạt động. |
-| **Driver** | `1 : N` | **Trip** | Một tài xế có thể thực hiện nhiều chuyến đi qua các thời điểm khác nhau, nhưng tại một thời điểm (một `Trip` đang chạy), chuyến đi chỉ được gán cho một tài xế duy nhất. |
+```mermaid
+flowchart TD
+    A[Tài xế / Nhân viên vận hành] --> B[Xem thông tin]
+    B --> C[Cập nhật hồ sơ]
+    C --> D[Cập nhật phương tiện]
+    D --> E{Thông tin hợp lệ?}
+    E -->|Không| F[Thông báo lỗi]
+    F --> C
+    E -->|Có| G[Lưu dữ liệu]
+```
 
 ---
 
-## 3. Sơ đồ ERD (Biểu đồ thực thể kết hợp bằng Mermaid)
+## Quy trình BR-05 – Cập nhật trạng thái tài xế
+
+```mermaid
+flowchart TD
+    A[Tài xế] --> B[Xem trạng thái]
+    B --> C[Chuyển trạng thái]
+    C --> D{Sẵn sàng nhận chuyến?}
+    D -->|Có| E[Available]
+    D -->|Không| F[Offline/Unavailable]
+    E --> G[Sẵn sàng được lựa chọn]
+    F --> H[Không hiển thị trong danh sách khả dụng]
+```
+
+---
+
+## Quy trình BR-06 – Tạo yêu cầu đặt xe
+
+```mermaid
+flowchart TD
+A[Khách hàng] --> B[Nhập điểm đón]
+    B --> C[Nhập điểm đến]
+    C --> D[Chọn loại xe]
+    D --> E[Kiểm tra thông tin]
+    E --> F{Hợp lệ?}
+    F -->|Không| G[Thông báo lỗi]
+    G --> E
+    F -->|Có| H[Tạo yêu cầu]
+    H --> I[Hiển thị danh sách tài xế/xe]
+```
+
+---
+
+## Quy trình BR-07 – Lựa chọn tài xế và xe
+
+```mermaid
+flowchart TD
+    A[Danh sách tài xế/xe khả dụng] --> B[Khách hàng xem danh sách]
+    B --> C[Chọn tài xế]
+    C --> D[Chọn xe]
+    D --> E{Tài xế còn khả dụng?}
+    E -->|Có| F[Xác nhận lựa chọn]
+    F --> G[Gán tài xế + xe cho yêu cầu]
+    E -->|Không| H[Thông báo tài xế không còn khả dụng]
+    H --> I[Hiển thị danh sách mới]
+```
+
+> Đây là điểm **MVP quan trọng**: chưa cần thuật toán tìm tài xế tối ưu; chỉ cần hệ thống xác định được tài xế đang ở trạng thái có thể nhận chuyến và cho khách hàng lựa chọn.
+
+---
+
+## Quy trình BR-08 – Theo dõi trạng thái chuyến
+
+```mermaid
+flowchart TD
+    A[Khách hàng] --> B[Xem yêu cầu]
+    B --> C{Trạng thái}
+    C --> D[Đang tìm tài xế]
+    C --> E[Đã có tài xế]
+    C --> F[Đang thực hiện]
+    C --> G[Hoàn thành]
+```
+
+---
+
+## Quy trình BR-09 – Xem lịch sử
+
+```mermaid
+flowchart TD
+    A[Khách hàng] --> B[Chọn lịch sử]
+    B --> C[Hệ thống truy vấn dữ liệu]
+    C --> D[Hiển thị danh sách chuyến]
+    D --> E[Chọn một chuyến]
+    E --> F[Hiển thị chi tiết]
+```
+
+---
+
+# B7. Functional Requirements – FR
+
+## Module 1 – Quản lý khách hàng
+
+| Mã FR | Functional Requirement | BR |
+|---|---|---|
+| **FR-CUS-01** | Hệ thống cho phép khách hàng đăng ký tài khoản | BR-01 |
+| **FR-CUS-02** | Hệ thống cho phép khách hàng đăng nhập | BR-01 |
+| **FR-CUS-03** | Hệ thống kiểm tra thông tin đăng nhập | BR-01 |
+| **FR-CUS-04** | Hệ thống cho phép khách hàng xem hồ sơ | BR-02 |
+| **FR-CUS-05** | Hệ thống cho phép khách hàng cập nhật hồ sơ | BR-02 |
+| **FR-CUS-06** | Hệ thống cho phép khách hàng nhập điểm đón | BR-06 |
+| **FR-CUS-07** | Hệ thống cho phép khách hàng nhập điểm đến | BR-06 |
+| **FR-CUS-08** | Hệ thống cho phép khách hàng chọn loại xe | BR-06 |
+| **FR-CUS-09** | Hệ thống cho phép khách hàng tạo yêu cầu đặt xe | BR-06 |
+| **FR-CUS-10** | Hệ thống hiển thị danh sách tài xế khả dụng | BR-07 |
+| **FR-CUS-11** | Hệ thống hiển thị thông tin phương tiện | BR-07 |
+| **FR-CUS-12** | Khách hàng có thể lựa chọn tài xế | BR-07 |
+| **FR-CUS-13** | Khách hàng có thể lựa chọn phương tiện | BR-07 |
+| **FR-CUS-14** | Hệ thống kiểm tra tài xế còn khả dụng trước khi xác nhận | BR-07 |
+| **FR-CUS-15** | Hệ thống hiển thị trạng thái yêu cầu/chuyến | BR-08 |
+| **FR-CUS-16** | Hệ thống cho phép khách hàng xem lịch sử chuyến | BR-09 |
+
+## Module 2 – Quản lý tài xế
+
+| Mã FR | Functional Requirement | BR |
+|---|---|---|
+| **FR-DRV-01** | Tạo tài khoản tài xế | BR-03 |
+| **FR-DRV-02** | Cho phép tài xế đăng nhập | BR-03 |
+| **FR-DRV-03** | Cho phép tài xế xem hồ sơ | BR-04 |
+| **FR-DRV-04** | Cho phép tài xế cập nhật hồ sơ | BR-04 |
+| **FR-DRV-05** | Quản lý thông tin phương tiện | BR-04 |
+| **FR-DRV-06** | Cho phép tài xế xem trạng thái hiện tại | BR-05 |
+| **FR-DRV-07** | Cho phép tài xế chuyển sang trạng thái sẵn sàng | BR-05 |
+| **FR-DRV-08** | Hiển thị yêu cầu chuyến phù hợp cho tài xế | BR-07 |
+| **FR-DRV-09** | Cho phép tài xế chấp nhận yêu cầu | BR-07 |
+| **FR-DRV-10** | Cho phép tài xế từ chối yêu cầu | BR-07 |
+| **FR-DRV-11** | Cho phép tài xế cập nhật trạng thái chuyến | BR-08 |
+
+Tài liệu yêu cầu tài xế phải có khả năng cập nhật trạng thái như đã đến điểm đón, đã đón khách, đang di chuyển và hoàn thành chuyến. fileciteturn0file0L19-L22
+
+---
+
+# B8. Business Rules – Quy tắc nghiệp vụ
+
+> Đây là phần rất quan trọng vì **FR nói hệ thống làm gì**, còn **Business Rule nói hệ thống phải tuân theo quy tắc nào**.
+
+| Mã Rule | Business Rule |
+|---|---|
+| **BRULE-01** | Khách hàng phải đăng nhập trước khi tạo yêu cầu đặt xe |
+| **BRULE-02** | Email/số điện thoại/tài khoản dùng đăng ký không được trùng với tài khoản đã tồn tại |
+| **BRULE-03** | Chỉ tài xế ở trạng thái **Available/Sẵn sàng** mới được hiển thị là tài xế có thể lựa chọn |
+| **BRULE-04** | Mỗi yêu cầu chỉ được gán cho một tài xế và một phương tiện tại một thời điểm |
+| **BRULE-05** | Tài xế không thể nhận thêm yêu cầu nếu đang thực hiện một chuyến đang hoạt động |
+| **BRULE-06** | Khi khách hàng xác nhận tài xế, hệ thống phải kiểm tra lại trạng thái tài xế để tránh chọn tài xế đã được người khác chọn |
+| **BRULE-07** | Tài xế phải có phương tiện hợp lệ trước khi được chuyển sang trạng thái sẵn sàng |
+| **BRULE-08** | Chỉ tài xế được gán cho chuyến mới được phép cập nhật trạng thái chuyến đó |
+| **BRULE-09** | Tài khoản đã bị khóa/ngừng hoạt động không được đăng nhập sử dụng chức năng yêu cầu tài khoản |
+| **BRULE-10** | Các thao tác thay đổi thông tin quan trọng phải được lưu vết |
+
+Một số rule như thời gian tài xế phải phản hồi, chính sách hủy, mất kết nối, cách tính cước và thời gian lưu trữ **chưa được khách hàng chốt trong tài liệu**, vì vậy cần ghi nhận là **Pending BA Clarification**, không nên tự ý xem là yêu cầu chính thức. fileciteturn0file0L54-L56
+
+---
+# B9. Non-Functional Requirements – Nghiệp vụ phi chức năng
+
+| Mã NFR | Yêu cầu phi chức năng |
+|---|---|
+| **NFR-01** | **Performance:** hệ thống phải phản hồi nhanh đối với các thao tác đăng nhập, xem hồ sơ và tạo yêu cầu |
+| **NFR-02** | **Availability:** hệ thống phải hoạt động ổn định trong thời điểm nhu cầu tăng cao |
+| **NFR-03** | **Security:** các chức năng yêu cầu tài khoản phải xác thực người dùng |
+| **NFR-04** | **Authorization:** chức năng quản trị phải kiểm soát quyền truy cập |
+| **NFR-05** | **Data Protection:** thông tin cá nhân, thông tin phương tiện và dữ liệu giao dịch phải được bảo vệ |
+| **NFR-06** | **Auditability:** các thao tác quan trọng phải được lưu vết |
+| **NFR-07** | **Scalability:** các thành phần hệ thống có khả năng mở rộng khi tải tăng |
+| **NFR-08** | **Maintainability:** có thể triển khai chức năng mới từng phần mà hạn chế ảnh hưởng đến chức năng đang hoạt động |
+| **NFR-09** | **Extensibility:** kiến trúc phải cho phép bổ sung loại dịch vụ, phương thức thanh toán và nhà cung cấp thông báo trong tương lai |
+
+Các yêu cầu này xuất phát trực tiếp từ phần ổn định, mở rộng, bảo mật và khả năng phát triển lâu dài trong tài liệu. fileciteturn0file0L46-L59
+
+---
+
+# B10. ERD – Entity Relationship Diagram
+
+## 1. Entity chính
+
+| Entity | Ý nghĩa |
+|---|---|
+| **CUSTOMER** | Lưu thông tin khách hàng |
+| **DRIVER** | Lưu tài khoản và thông tin tài xế |
+| **VEHICLE** | Lưu thông tin phương tiện |
+| **RIDE_REQUEST** | Lưu yêu cầu đặt xe |
+| **DRIVER_STATUS_HISTORY** | Lưu lịch sử thay đổi trạng thái tài xế |
+
+## 2. Mermaid ERD
 
 ```mermaid
 erDiagram
-    CUSTOMER ||--o{ TRIP : creates
-    DRIVER ||--|{ VEHICLE : owns
-    DRIVER ||--o{ TRIP : executes
 
     CUSTOMER {
-        string customer_id PK
-        string phone_number
+        int customer_id PK
+        string full_name
+        string phone
+        string email
+        string password
         string status
         datetime created_at
+        datetime updated_at
     }
 
     DRIVER {
-        string driver_id PK
-        string phone_number
-        string name
-        string online_status
-        float current_latitude
-        float current_longitude
+        int driver_id PK
+        string full_name
+        string phone
+        string email
+        string password
         string status
+        datetime created_at
+        datetime updated_at
     }
 
     VEHICLE {
-        string vehicle_id PK
-        string driver_id FK
+        int vehicle_id PK
+        int driver_id FK
+        string plate_number
         string vehicle_type
-        string license_plate
+        string brand
+        string model
+        string status
     }
 
-    TRIP {
-        string trip_id PK
-        string customer_id FK
-        string driver_id FK
-        float pickup_latitude
-        float pickup_longitude
-        float dropoff_latitude
-        float dropoff_longitude
+    RIDE_REQUEST {
+        int ride_id PK
+        int customer_id FK
+        int driver_id FK
+        int vehicle_id FK
+        string pickup_location
+        string destination
         string vehicle_type_requested
-        float estimated_fare
         string status
         datetime created_at
         datetime completed_at
     }
-
-# Thiết kế Sơ đồ Use Case (Use Case Diagram & Description) - Nền tảng CAB (Giai đoạn MVP)
-
-Dựa trên phạm vi MVP đã xác định (gồm Module Khách hàng, Module Tài xế và Hệ thống trung tâm tự động hóa), dưới đây là mô hình Use Case bao gồm tác nhân, sơ đồ tổng quan và đặc tả chi tiết cho các chức năng cốt lõi.
-
-## 1. Xác định Tác nhân (Actors) và Use Case trong MVP
-
-| Tác nhân | Các Use Case chính trong MVP |
-| :--- | :--- |
-| **Khách hàng (Customer)** | • Đăng ký / Đăng nhập tài khoản (qua OTP)<br>• Nhập điểm đón / điểm đến & chọn loại xe<br>• Gửi yêu cầu đặt xe<br>• Theo dõi trạng thái & vị trí tài xế chuyến đi |
-| **Tài xế (Driver)** | • Cập nhật trạng thái hoạt động (Online / Offline)<br>• Nhận thông báo cuốc xe mới<br>• Phản hồi cuốc xe (Chấp nhận / Từ chối)<br>• Cập nhật luồng trạng thái chuyến đi (Đã đến điểm đón, Bắt đầu, Hoàn thành) |
-| **Hệ thống (System / Backend)** | • Thuật toán tự động quét và phân công tài xế gần nhất<br>• Xơ chế tự động chuyển cuốc (Re-routing) khi tài xế từ chối/hết giờ<br>• Tính toán cước phí dự kiến tĩnh<br>• Quản lý phiên chuyến đi và ghi logs |
-
----
-
-## 2. Sơ đồ Use Case tổng quan (Diagram bằng Mermaid)
-
-```mermaid
-usecaseDiagram
-    actor KhachHang as "Khách hàng"
-    actor TaiXe as "Tài xế"
-    actor HeThong as "Hệ thống (Backend)"
-
-    rectangle "Hệ thống Nền tảng CAB - MVP" {
-        usecase "Đăng nhập / Xác thực OTP" as UC1
-        usecase "Đặt xe (Nhập điểm & Chọn loại xe)" as UC2
-        usecase "Theo dõi hành trình chuyến đi" as UC3
-        
-        usecase "Cập nhật trạng thái Online/Offline" as UC4
-        usecase "Nhận và phản hồi cuốc xe" as UC5
-        usecase "Cập nhật tiến trình chuyến đi" as UC6
-        
-        usecase "Tự động phân công tài xế (Auto-Dispatch)" as UC7
-        usecase "Tự động điều phối thay thế (Re-routing)" as UC8
-        usecase "Tính cước & Quản lý phiên" as UC9
+DRIVER_STATUS_HISTORY {
+        int history_id PK
+        int driver_id FK
+        string old_status
+        string new_status
+        datetime changed_at
     }
 
-# Thiết kế Sơ đồ Use Case (Use Case Diagram & Description) - Nền tảng CAB (Giai đoạn MVP)
+    CUSTOMER ||--o{ RIDE_REQUEST : creates
+    DRIVER ||--o{ VEHICLE : owns
+    DRIVER ||--o{ RIDE_REQUEST : accepts
+    VEHICLE ||--o{ RIDE_REQUEST : serves
+    DRIVER ||--o{ DRIVER_STATUS_HISTORY : changes
+```
 
-Dựa trên phạm vi MVP đã xác định (gồm Module Khách hàng, Module Tài xế và Hệ thống trung tâm tự động hóa), dưới đây là mô hình Use Case bao gồm tác nhân, sơ đồ tổng quan và đặc tả chi tiết cho các chức năng cốt lõi.
+### Quan hệ chính
 
-## 1. Xác định Tác nhân (Actors) và Use Case trong MVP
+```text
+CUSTOMER 1 ---- N RIDE_REQUEST
 
-| Tác nhân | Các Use Case chính trong MVP |
-| :--- | :--- |
-| **Khách hàng (Customer)** | • Đăng ký / Đăng nhập tài khoản (qua OTP)<br>• Nhập điểm đón / điểm đến & chọn loại xe<br>• Gửi yêu cầu đặt xe<br>• Theo dõi trạng thái & vị trí tài xế chuyến đi |
-| **Tài xế (Driver)** | • Cập nhật trạng thái hoạt động (Online / Offline)<br>• Nhận thông báo cuốc xe mới<br>• Phản hồi cuốc xe (Chấp nhận / Từ chối)<br>• Cập nhật luồng trạng thái chuyến đi (Đã đến điểm đón, Bắt đầu, Hoàn thành) |
-| **Hệ thống (System / Backend)** | • Thuật toán tự động quét và phân công tài xế gần nhất<br>• Xơ chế tự động chuyển cuốc (Re-routing) khi tài xế từ chối/hết giờ<br>• Tính toán cước phí dự kiến tĩnh<br>• Quản lý phiên chuyến đi và ghi logs |
+DRIVER   1 ---- N VEHICLE
+
+DRIVER   1 ---- N RIDE_REQUEST
+
+VEHICLE  1 ---- N RIDE_REQUEST
+
+DRIVER   1 ---- N DRIVER_STATUS_HISTORY
+```
+
+> `RIDE_REQUEST` rất quan trọng dù đề bài chỉ có 2 module, bởi vì nó là entity trung gian giúp kết nối **khách hàng → tài xế → xe**, phục vụ trực tiếp chức năng khách hàng lựa chọn tài xế và xe.
 
 ---
 
-## 2. Sơ đồ Use Case tổng quan (Diagram bằng Mermaid)
+# B11. Thiết kế Use Case
+
+## 1. Use Case Diagram tổng quát
 
 ```mermaid
-usecaseDiagram
-    actor KhachHang as "Khách hàng"
-    actor TaiXe as "Tài xế"
-    actor HeThong as "Hệ thống (Backend)"
+flowchart LR
 
-    rectangle "Hệ thống Nền tảng CAB - MVP" {
-        usecase "Đăng nhập / Xác thực OTP" as UC1
-        usecase "Đặt xe (Nhập điểm & Chọn loại xe)" as UC2
-        usecase "Theo dõi hành trình chuyến đi" as UC3
-        
-        usecase "Cập nhật trạng thái Online/Offline" as UC4
-        usecase "Nhận và phản hồi cuốc xe" as UC5
-        usecase "Cập nhật tiến trình chuyến đi" as UC6
-        
-        usecase "Tự động phân công tài xế (Auto-Dispatch)" as UC7
-        usecase "Tự động điều phối thay thế (Re-routing)" as UC8
-        usecase "Tính cước & Quản lý phiên" as UC9
-    }
+    Customer([Khách hàng])
+    Driver([Tài xế])
+    Operator([Nhân viên vận hành])
 
-    KhachHang --> UC1
-    KhachHang --> UC2
-    KhachHang --> UC3
+    subgraph CAB["CAB System - MVP"]
 
-    TaiXe --> UC1
-    TaiXe --> UC4
-    TaiXe --> UC5
-    TaiXe --> UC6
+        subgraph CustomerModule["Module: Quản lý khách hàng"]
+            UC01((Đăng ký))
+            UC02((Đăng nhập))
+            UC03((Quản lý hồ sơ))
+            UC04((Tạo yêu cầu đặt xe))
+            UC05((Chọn loại xe))
+            UC06((Chọn tài xế))
+            UC07((Chọn phương tiện))
+            UC08((Theo dõi trạng thái))
+            UC09((Xem lịch sử))
+        end
 
-    UC2 -.-> UC7 : <<include>>
-    UC5 -.-> UC8 : <<extend>>
-    UC2 -.-> UC9 : <<include>>
-    UC6 -.-> UC9 : <<include>>
+        subgraph DriverModule["Module: Quản lý tài xế"]
+            UC10((Quản lý tài khoản))
+            UC11((Quản lý hồ sơ))
+            UC12((Quản lý phương tiện))
+            UC13((Cập nhật trạng thái))
+            UC14((Nhận yêu cầu))
+            UC15((Chấp nhận yêu cầu))
+            UC16((Từ chối yêu cầu))
+            UC17((Cập nhật trạng thái chuyến))
+        end
 
-# Tiêu chí Chấp nhận (Acceptance Criteria - AC) cho các Yêu cầu Chức năng (FR) - MVP
+        subgraph OperatorModule["Hỗ trợ quản lý tài xế"]
+            UC18((Tạo tài khoản tài xế))
+        end
+    end
 
-Dựa trên các Yêu cầu Chức năng (FR) đã xây dựng cho giai đoạn MVP của nền tảng CAB, dưới đây là các Tiêu chí Chấp nhận (Acceptance Criteria) cụ thể theo chuẩn **BDD (Behavior-Driven Development)** với định dạng `Given - When - Then` để đội ngũ phát triển và kiểm thử (QA) tiến hành nghiệm thu.
+    Customer --> UC01
+    Customer --> UC02
+    Customer --> UC03
+    Customer --> UC04
+    Customer --> UC05
+    Customer --> UC06
+    Customer --> UC07
+    Customer --> UC08
+    Customer --> UC09
 
----
+    Driver --> UC02
+    Driver --> UC10
+    Driver --> UC11
+    Driver --> UC12
+    Driver --> UC13
+    Driver --> UC14
+    Driver --> UC15
+    Driver --> UC16
+    Driver --> UC17
 
-## 1. Tiêu chí Chấp nhận cho Module Khách hàng (Customer App)
-
-### FR-C01: Xác thực tài khoản (OTP)
-* **AC-01.1 (Gửi mã OTP thành công):**
-  * **Given** Khách hàng đang ở màn hình đăng nhập và nhập số điện thoại hợp lệ.
-  * **When** Khách hàng nhấn nút "Nhận mã OTP".
-  * **Then** Hệ thống phải gửi mã xác thực thành công về số điện thoại đó và hiển thị màn hình nhập OTP kèm đồng hồ đếm ngược 60 giây.
-* **AC-01.2 (Xác thực OTP hợp lệ):**
-  * **Given** Khách hàng đã nhập mã OTP gồm 6 chữ số do hệ thống cung cấp.
-  * **When** Khách hàng bấm nút "Xác nhận".
-  * **Then** Hệ thống cho phép đăng nhập thành công, lưu phiên làm việc (Session) và chuyển hướng khách hàng vào màn hình chính (Trang đặt xe).
-
-### FR-C02 & FR-C03: Nhập vị trí, Chọn loại xe và Báo giá
-* **AC-02.1 (Hiển thị cước phí dự kiến):**
-  * **Given** Khách hàng đã nhập đầy đủ địa chỉ điểm đón và điểm đến trên bản đồ.
-  * **When** Khách hàng chọn một loại phương tiện cụ thể (VD: CAB 4 chỗ).
-  * **Then** Hệ thống phải hiển thị chính xác cước phí dự kiến tính theo công thức tĩnh (Khoảng cách $\times$ Đơn giá chuẩn) và nút "Đặt xe" được kích hoạt.
-
-### FR-C04 & FR-C05: Gửi yêu cầu và Theo dõi trạng thái
-* **AC-04.1 (Chuyển trạng thái khi đặt xe):**
-  * **Given** Khách hàng đã chọn loại xe và thấy giá tiền dự kiến.
-  * **When** Khách hàng bấm nút "Đặt xe".
-  * **Then** Giao diện phải lập tức chuyển sang màn hình "Đang tìm tài xế" và hệ thống tiến hành kích hoạt thuật toán phân công ngầm dưới nền.
+    Operator --> UC18
+```
 
 ---
 
-## 2. Tiêu chí Chấp nhận cho Module Tài xế (Driver App)
+## 2. Use Case chính: Khách hàng lựa chọn tài xế và xe
 
-### FR-D01: Chuyển đổi trạng thái (Online/Offline)
-* **AC-05.1 (Bật trạng thái sẵn sàng):**
-  * **Given** Tài xế đã đăng nhập thành công vào ứng dụng tài xế.
-  * **When** Tài xế gạt nút chuyển sang chế độ "Sẵn sàng" (Online).
-  * **Then** Ứng dụng phải bắt đầu định kỳ gửi tọa độ GPS hiện tại của tài xế về máy chủ trung tâm với tần suất 5 giây/lần.
+### UC-CUS-06 – Lựa chọn tài xế
 
-### FR-D02 & FR-D03: Nhận thông báo và Phản hồi cuốc xe
-* **AC-06.1 (Hiển thị popup nhận cuốc):**
-  * **Given** Tài xế đang ở trạng thái Online và nằm trong bán kính quét của hệ thống.
-  * **When** Có một yêu cầu đặt xe phù hợp được phát tới.
-  * **Then** Màn hình điện thoại của tài xế phải hiển thị popup thông tin chuyến đi (Điểm đón, Điểm đến, Khoảng cách) kèm thanh đếm ngược thời gian phản hồi trong 15 giây.
-* **AC-06.2 (Xử lý quá thời gian timeout):**
-  * **Given** Tài xế nhận được thông báo cuốc xe mới nhưng không bấm nút Chấp nhận trong vòng 15 giây.
-  * **When** Hết thời gian đếm ngược.
-  * **Then** Hệ thống phải tự động đóng popup, ghi nhận là "Từ chối" và chuyển cuốc xe sang tài xế tiếp theo mà không làm ảnh hưởng đến ứng dụng của tài xế.
-
-### FR-D04: Cập nhật hành trình tuần tự
-* **AC-07.1 (Tuân thủ luồng trạng thái một chiều):**
-  * **Given** Tài xế đã chấp nhận cuốc xe và đang trên đường đến điểm đón.
-  * **When** Tài xế đến nơi và bấm nút "Đã đến điểm đón".
-  * **Then** Trạng thái trên ứng dụng khách hàng phải được cập nhật thời gian thực theo, đồng thời nút bấm của tài xế chuyển sang bước tiếp theo ("Bắt đầu chuyến đi"). Tài xế không thể nhảy cóc trạng thái khi chưa hoàn thành bước trước đó.
+| Thành phần | Nội dung |
+|---|---|
+| **Actor** | Khách hàng |
+| **Pre-condition** | Khách hàng đã đăng nhập và đã tạo yêu cầu |
+| **Input** | Yêu cầu chuyến, loại xe |
+| **Main flow** | Hiển thị tài xế khả dụng → khách hàng xem thông tin → chọn tài xế → hệ thống kiểm tra lại trạng thái → xác nhận |
+| **Alternative flow** | Tài xế không còn khả dụng → thông báo → hiển thị danh sách mới |
+| **Post-condition** | Tài xế được gán cho yêu cầu |
 
 ---
 
-## 3. Tiêu chí Chấp nhận cho Module Hệ thống Trung tâm (Backend Auto-Dispatch)
+## 3. Use Case chính: Tài xế chuyển trạng thái
 
-### FR-S01 & FR-S02: Thuật toán quét và Re-routing
-* **AC-08.1 (Cơ chế tự động chuyển tài xế thay thế):**
-  * **Given** Tài xế số 1 được hệ thống chỉ định nhận cuốc nhưng bấm nút "Từ chối" hoặc bị Timeout.
-  * **When** Hệ thống nhận tín hiệu từ chối từ tài xế số 1.
-  * **Then** Hệ thống phải tự động loại bỏ tài xế số 1 khỏi phiên, tìm ngay tài xế có vị trí gần thứ hai trong bán kính cho phép và gửi thông báo cuốc xe mới tới tài xế đó trong vòng dưới 2 giây. Khách hàng hoàn toàn không phải thao tác tạo lại yêu cầu.
+### UC-DRV-13 – Cập nhật trạng thái
 
-### FR-S03: Thông báo khi hết xe
-* **AC-09.1 (Xử lý khi không còn tài xế):**
-  * **Given** Hệ thống đã thực hiện quét tìm kiếm qua toàn bộ các tài xế trong bán kính giới hạn tối đa nhưng không có ai chấp nhận hoặc không còn tài xế Online.
-  * **When** Vòng lặp quét kết thúc.
-  * **Then** Hệ thống phải đóng hoàn toàn phiên tìm kiếm, hiển thị hộp thoại thông báo lỗi rõ ràng cho khách hàng ("Hiện tại không tìm thấy tài xế phù hợp, vui lòng thử lại sau") và giải phóng dữ liệu cuốc xe.
-# Bảng Truy vết Yêu cầu (Traceability Matrix) - Nền tảng CAB (Giai đoạn MVP)
+| Thành phần | Nội dung |
+|---|---|
+| **Actor** | Tài xế |
+| **Pre-condition** | Tài xế đăng nhập |
+| **Main flow** | Tài xế mở trạng thái → chọn Available → hệ thống kiểm tra điều kiện → cập nhật |
+| **Alternative flow** | Không đủ điều kiện → hệ thống từ chối |
+| **Post-condition** | Tài xế được đưa vào/loại khỏi danh sách có thể nhận chuyến |
 
-Bảng truy vết dưới đây giúp kiểm soát chặt chẽ toàn bộ dự án bằng cách liên kết xuyên suốt từ **Quy tắc Nghiệp vụ (BR)**, **Yêu cầu Chức năng (FR)**, **Use Case (UC)** cho đến **Tiêu chí Chấp nhận (AC)**. Điều này đảm bảo không có yêu cầu nào bị bỏ sót và mọi tính năng đều có thể kiểm thử nghiệm thu chính xác.
+---
 
-| Mã BR | Tên Quy tắc Nghiệp vụ (Business Rules) | Mã FR liên kết | Tên Yêu cầu Chức năng (Functional Requirements) | Mã Use Case | Mã Tiêu chí Chấp nhận (Acceptance Criteria) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **BR-01** | Quy tắc phân loại phương tiện | **FR-C02**<br>**FR-C03** | Nhập vị trí & Tìm đường<br>Báo giá cuốc xe | UC-C02 | AC-02.1 |
-| **BR-02** | Quy tắc phân công tài xế tự động | **FR-C04**<br>**FR-D01**<br>**FR-S01** | Gửi yêu cầu đặt xe<br>Chuyển trạng thái Online/Offline<br>Thuật toán quét tài xế | UC-C02<br>UC-D01<br>UC-7 | AC-04.1<br>AC-05.1 |
-| **BR-03** | Quy tắc hiển thị thông tin nhận diện | **FR-C05** | Theo dõi trạng thái & Thông tin tài xế | UC-C02<br>UC-D02 | AC-06.1 |
-| **BR-04** | Quy tắc xử lý từ chối/timeout chuyến đi | **FR-D03**<br>**FR-S02** | Chấp nhận/Từ chối cuốc xe<br>Cơ chế Re-routing thay thế | UC-D02<br>UC-8 | AC-06.2<br>AC-08.1 |
-| **BR-05** | Quy tắc thông báo khi không tìm thấy tài xế | **FR-C07**<br>**FR-S03** | Thông báo hết xe & Quản lý phiên | UC-C02<br>UC-9 | AC-09.1 |
-| **BR-06** | Quy tắc xác thực tài khoản tối giản | **FR-C01** | Xác thực tài khoản qua OTP | UC-C01<br>UC-D01 | AC-01.1<br>AC-01.2 |
-| **BR-07** | Quy tắc cập nhật trạng thái hành trình tuần tự | **FR-D04** | Cập nhật luồng trạng thái hành trình | UC-D03 | AC-07.1 |
+# B12. Acceptance Criteria – AC
+
+Acceptance Criteria dùng để xác định **khi nào FR được xem là hoàn thành và đủ điều kiện nghiệm thu**.
+
+| AC | FR liên quan | Tiêu chí chấp nhận |
+|---|---|---|
+| **AC-01** | FR-CUS-01 | Nhập đầy đủ dữ liệu hợp lệ → tài khoản được tạo thành công |
+| **AC-02** | FR-CUS-02 | Tài khoản và mật khẩu đúng → đăng nhập thành công |
+| **AC-03** | FR-CUS-03 | Sai thông tin → hệ thống không cho đăng nhập và hiển thị thông báo |
+| **AC-04** | FR-CUS-05 | Thay đổi thông tin hợp lệ → dữ liệu mới được lưu |
+| **AC-05** | FR-CUS-06/07 | Điểm đón và điểm đến được nhập và lưu cùng yêu cầu |
+| **AC-06** | FR-CUS-08 | Khách hàng có thể chọn một loại xe được hệ thống hỗ trợ |
+| **AC-07** | FR-CUS-09 | Đủ thông tin → yêu cầu đặt xe được tạo với trạng thái ban đầu |
+| **AC-08** | FR-CUS-10 | Chỉ tài xế Available mới xuất hiện trong danh sách lựa chọn |
+| **AC-09** | FR-CUS-11 | Danh sách hiển thị được thông tin phương tiện tương ứng |
+| **AC-10** | FR-CUS-12/13 | Khách hàng có thể chọn một tài xế và phương tiện |
+| **AC-11** | FR-CUS-14 | Tài xế chuyển sang unavailable trước khi xác nhận → hệ thống từ chối lựa chọn |
+| **AC-12** | FR-CUS-15 | Khi tài xế nhận chuyến, trạng thái khách hàng nhìn thấy được cập nhật |
+| **AC-13** | FR-CUS-16 | Khách hàng có thể xem danh sách lịch sử của chính mình |
+| **AC-14** | FR-DRV-01 | Tài khoản tài xế được tạo với dữ liệu hợp lệ |
+| **AC-15** | FR-DRV-04 | Tài xế cập nhật hồ sơ → thông tin mới được lưu |
+| **AC-16** | FR-DRV-05 | Thông tin xe được gắn với đúng tài xế |
+| **AC-17** | FR-DRV-07 | Tài xế đủ điều kiện → có thể chuyển sang Available |
+| **AC-18** | FR-DRV-09 | Tài xế chấp nhận → yêu cầu được gán cho tài xế |
+| **AC-19** | FR-DRV-10 | Tài xế từ chối → yêu cầu vẫn tồn tại và có thể xử lý tiếp |
+| **AC-20** | FR-DRV-11 | Tài xế thay đổi trạng thái chuyến → trạng thái được lưu và hiển thị cho khách hàng |
+
+---
+
+# B13. Traceability Matrix – Bảng truy vết
+
+Đây là bảng dùng để kiểm soát xem **yêu cầu khách hàng → BR → quy trình → FR → AC** có bị bỏ sót hay không.
+
+| BR | Business Process | FR | AC | Trạng thái MVP |
+|---|---|---|---|---|
+| **BR-01** | Đăng ký/đăng nhập khách hàng | FR-CUS-01 → FR-CUS-03 | AC-01 → AC-03 | ✅ |
+| **BR-02** | Quản lý hồ sơ | FR-CUS-04 → FR-CUS-05 | AC-04 | ✅ |
+| **BR-03** | Tạo/quản lý tài khoản tài xế | FR-DRV-01 → FR-DRV-02 | AC-14 | ✅ |
+| **BR-04** | Quản lý hồ sơ & xe | FR-DRV-03 → FR-DRV-05 | AC-15 → AC-16 | ✅ |
+| **BR-05** | Quản lý trạng thái | FR-DRV-06 → FR-DRV-07 | AC-08, AC-17 | ✅ |
+| **BR-06** | Tạo yêu cầu đặt xe | FR-CUS-06 → FR-CUS-09 | AC-05 → AC-07 | ✅ |
+| **BR-07** | Chọn tài xế & xe | FR-CUS-10 → FR-CUS-14, FR-DRV-08 → FR-DRV-10 | AC-08 → AC-11, AC-18 → AC-19 | ✅ |
+| **BR-08** | Theo dõi trạng thái | FR-CUS-15, FR-DRV-11 | AC-12, AC-20 | ✅ |
+| **BR-09** | Lịch sử chuyến | FR-CUS-16 | AC-13 | ✅ |
+
+## Ma trận truy vết tổng quát
+
+```text
+Customer Requirement
+        ↓
+       BR
+        ↓
+ Business Process
+        ↓
+       FR
+        ↓
+       AC
+        ↓
+  Nghiệm thu MVP
+```
+
+Ví dụ:
+
+```text
+"Khách hàng muốn lựa chọn tài xế"
+            ↓
+         BR-07
+            ↓
+  Quy trình lựa chọn tài xế
+            ↓
+   FR-CUS-10 → FR-CUS-14
+            ↓
+      AC-08 → AC-11
+            ↓
+       Nghiệm thu
+```
+
+---
+
+# B14. Test Case
+
+**Chưa thực hiện ở giai đoạn này**, đúng với yêu cầu đề bài.
+
+Quy trình triển khai sau này sẽ là:
+
+```text
+BR
+ ↓
+Business Process
+ ↓
+FR
+ ↓
+Business Rule
+ ↓
+NFR
+ ↓
+Use Case
+ ↓
+Acceptance Criteria
+ ↓
+Test Case
+```
+
+---
+
+# Tổng hợp phạm vi MVP
+
+## Module 1 – Quản lý khách hàng
+
+```text
+Đăng ký
+   ↓
+Đăng nhập
+   ↓
+Quản lý hồ sơ
+   ↓
+Tạo yêu cầu
+   ↓
+Nhập điểm đón / điểm đến
+   ↓
+Chọn loại xe
+   ↓
+Chọn tài xế
+   ↓
+Chọn phương tiện
+   ↓
+Theo dõi trạng thái
+   ↓
+Xem lịch sử
+```
+
+## Module 2 – Quản lý tài xế
+
+```text
+Tài khoản
+   ↓
+Hồ sơ
+   ↓
+Phương tiện
+   ↓
+Trạng thái hoạt động
+   ↓
+Available
+   ↓
+Nhận yêu cầu
+   ↓
+Chấp nhận / Từ chối
+   ↓
+Cập nhật trạng thái chuyến
+```
+
+## Những gì MVP **không tập trung**
+
+```text
+Thanh toán
+Đánh giá tài xế
+Báo cáo doanh thu
+Thuật toán matching nâng cao
+Định vị GPS thời gian thực
+Notification đa kênh
+Phân tích hiệu quả tài xế
+```
+
+Điều này giữ đúng tinh thần **“giai đoạn này không cần tài xế tốt mà chỉ cần hệ thống hoạt động”**: MVP ưu tiên chứng minh được luồng nghiệp vụ cốt lõi **Khách hàng → Yêu cầu → Xe/Tài xế → Chuyến**, thay vì cố xây dựng ngay một hệ thống CAB hoàn chỉnh. Tài liệu gốc cũng xác định mục tiêu dài hạn là một nền tảng có thể phát triển thêm tính năng, trong khi BA phải làm rõ các điểm chưa chốt trước khi nhóm phát triển triển khai. fileciteturn0file0L60-L66
+
+### Các điểm cần BA xác nhận trước khi khóa yêu cầu
+
+| Nội dung | Tình trạng |
+|---|---|
+| Cách tính cước | **Chưa chốt** |
+| Tiêu chí ưu tiên tài xế | **Chưa chốt** |
+| Thời gian tài xế phản hồi | **Chưa chốt** |
+| Chính sách hủy chuyến | **Chưa chốt** |
+| Xử lý mất mạng | **Chưa chốt** |
+| Thời gian lưu trữ dữ liệu | **Chưa chốt** |
+
+Đây là các điểm được tài liệu nêu rõ là doanh nghiệp hiện chưa chốt và cần BA làm rõ với stakeholder. fileciteturn0file0L54-L56
