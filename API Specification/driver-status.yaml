@@ -1,0 +1,186 @@
+openapi: 3.0.3
+
+info:
+  title: CAB System - Driver Status API
+  description: API quản lý trạng thái hoạt động của tài xế
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+
+tags:
+  - name: Driver Status
+    description: Quản lý trạng thái tài xế
+
+paths:
+
+  /drivers/{driverId}/status:
+
+    get:
+      tags:
+        - Driver Status
+      summary: Xem trạng thái hiện tại của tài xế
+      operationId: getDriverStatus
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: '#/components/parameters/DriverId'
+
+      responses:
+        '200':
+          description: Lấy trạng thái thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DriverStatusResponse'
+
+        '404':
+          description: Không tìm thấy tài xế
+
+    put:
+      tags:
+        - Driver Status
+      summary: Cập nhật trạng thái tài xế
+      operationId: updateDriverStatus
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: '#/components/parameters/DriverId'
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDriverStatusRequest'
+
+      responses:
+        '200':
+          description: Cập nhật trạng thái thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DriverStatusResponse'
+
+        '400':
+          description: Không đủ điều kiện chuyển trạng thái
+
+        '403':
+          description: Không có quyền cập nhật trạng thái
+
+        '404':
+          description: Không tìm thấy tài xế
+
+  /drivers/{driverId}/status-history:
+
+    get:
+      tags:
+        - Driver Status
+      summary: Lấy lịch sử trạng thái tài xế
+      operationId: getDriverStatusHistory
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: '#/components/parameters/DriverId'
+
+      responses:
+        '200':
+          description: Lấy lịch sử trạng thái thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DriverStatusHistoryResponse'
+
+        '404':
+          description: Không tìm thấy tài xế
+
+components:
+
+  securitySchemes:
+
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+
+    DriverId:
+      name: driverId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        example: 10
+
+  schemas:
+
+    UpdateDriverStatusRequest:
+      type: object
+      required:
+        - status
+
+      properties:
+
+        status:
+          type: string
+          enum:
+            - OFFLINE
+            - AVAILABLE
+            - UNAVAILABLE
+            - BUSY
+          example: AVAILABLE
+
+    DriverStatusResponse:
+      type: object
+      properties:
+
+        driver_id:
+          type: integer
+          example: 10
+
+        status:
+          type: string
+          enum:
+            - OFFLINE
+            - AVAILABLE
+            - UNAVAILABLE
+            - BUSY
+          example: AVAILABLE
+
+        updated_at:
+          type: string
+          format: date-time
+
+    DriverStatusHistoryResponse:
+      type: object
+      properties:
+
+        history_id:
+          type: integer
+          example: 100
+
+        driver_id:
+          type: integer
+          example: 10
+
+        old_status:
+          type: string
+          example: OFFLINE
+
+        new_status:
+          type: string
+          example: AVAILABLE
+
+        changed_at:
+          type: string
+          format: date-time

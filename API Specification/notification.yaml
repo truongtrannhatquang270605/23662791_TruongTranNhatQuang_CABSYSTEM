@@ -1,0 +1,185 @@
+openapi: 3.0.3
+
+info:
+  title: CAB System - Notification API
+  description: API quản lý thông báo cho khách hàng và tài xế
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+
+tags:
+  - name: Notifications
+    description: Quản lý thông báo
+
+paths:
+
+  /notifications:
+
+    get:
+      tags:
+        - Notifications
+      summary: Lấy danh sách thông báo
+      operationId: getNotifications
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+
+        - name: user_id
+          in: query
+          schema:
+            type: integer
+            example: 1
+
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum:
+              - BOOKING_CREATED
+              - DRIVER_ASSIGNED
+              - DRIVER_ARRIVED
+              - TRIP_COMPLETED
+              - PAYMENT_RESULT
+              - TRIP_UPDATED
+
+        - name: is_read
+          in: query
+          schema:
+            type: boolean
+
+      responses:
+
+        '200':
+          description: Lấy danh sách thông báo thành công
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationResponse'
+
+        '401':
+          description: Chưa xác thực
+
+  /notifications/{notificationId}:
+
+    get:
+      tags:
+        - Notifications
+      summary: Xem thông báo
+      operationId: getNotificationById
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: '#/components/parameters/NotificationId'
+
+      responses:
+
+        '200':
+          description: Lấy thông báo thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationResponse'
+
+        '404':
+          description: Không tìm thấy thông báo
+
+    put:
+      tags:
+        - Notifications
+      summary: Đánh dấu đã đọc
+      operationId: markNotificationAsRead
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: '#/components/parameters/NotificationId'
+
+      responses:
+
+        '200':
+          description: Đánh dấu thông báo đã đọc thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationResponse'
+
+        '404':
+          description: Không tìm thấy thông báo
+
+components:
+
+  securitySchemes:
+
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+
+    NotificationId:
+      name: notificationId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        example: 100
+
+  schemas:
+
+    NotificationResponse:
+      type: object
+      properties:
+
+        notification_id:
+          type: integer
+          example: 100
+
+        user_id:
+          type: integer
+          example: 1
+
+        type:
+          type: string
+          enum:
+            - BOOKING_CREATED
+            - DRIVER_ASSIGNED
+            - DRIVER_ARRIVED
+            - TRIP_COMPLETED
+            - PAYMENT_RESULT
+            - TRIP_UPDATED
+          example: DRIVER_ASSIGNED
+
+        title:
+          type: string
+          example: "Tài xế đã nhận chuyến"
+
+        message:
+          type: string
+          example: "Tài xế Tran Van B đã nhận yêu cầu đặt xe của bạn."
+
+        channel:
+          type: string
+          enum:
+            - IN_APP
+            - PUSH
+            - SMS
+            - EMAIL
+          example: IN_APP
+
+        is_read:
+          type: boolean
+          example: false
+
+        created_at:
+          type: string
+          format: date-time

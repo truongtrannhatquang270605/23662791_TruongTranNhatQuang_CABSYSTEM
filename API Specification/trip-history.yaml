@@ -1,0 +1,199 @@
+openapi: 3.0.3
+
+info:
+  title: CAB System - Trip History API
+  description: API tra cứu lịch sử chuyến của khách hàng
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+
+tags:
+  - name: Trip History
+    description: Tra cứu lịch sử chuyến
+
+paths:
+
+  /customers/{customerId}/trip-history:
+
+    get:
+      tags:
+        - Trip History
+      summary: Lấy lịch sử chuyến của khách hàng
+      operationId: getCustomerTripHistory
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+
+        - $ref: '#/components/parameters/CustomerId'
+
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum:
+              - COMPLETED
+              - CANCELLED
+              - IN_PROGRESS
+
+      responses:
+
+        '200':
+          description: Lấy lịch sử chuyến thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripHistoryResponse'
+
+        '401':
+          description: Chưa xác thực
+
+        '403':
+          description: Không có quyền xem lịch sử của khách hàng khác
+
+        '404':
+          description: Không tìm thấy khách hàng
+
+  /customers/{customerId}/trip-history/{tripId}:
+
+    get:
+      tags:
+        - Trip History
+      summary: Xem chi tiết một chuyến trong lịch sử
+      operationId: getTripHistoryDetail
+
+      security:
+        - bearerAuth: []
+
+      parameters:
+
+        - $ref: '#/components/parameters/CustomerId'
+
+        - $ref: '#/components/parameters/TripId'
+
+      responses:
+
+        '200':
+          description: Lấy chi tiết chuyến thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripHistoryItem'
+
+        '403':
+          description: Không có quyền truy cập
+
+        '404':
+          description: Không tìm thấy chuyến
+
+components:
+
+  securitySchemes:
+
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+
+    CustomerId:
+      name: customerId
+      in: path
+      required: true
+      schema:
+        type: integer
+        example: 1
+
+    TripId:
+      name: tripId
+      in: path
+      required: true
+      schema:
+        type: integer
+        example: 1001
+
+  schemas:
+
+    TripHistoryResponse:
+      type: object
+      properties:
+
+        page:
+          type: integer
+          example: 1
+
+        size:
+          type: integer
+          example: 20
+
+        total:
+          type: integer
+          example: 45
+
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TripHistoryItem'
+
+    TripHistoryItem:
+      type: object
+      properties:
+
+        trip_id:
+          type: integer
+          example: 1001
+
+        customer_id:
+          type: integer
+          example: 1
+
+        driver_id:
+          type: integer
+          example: 10
+
+        vehicle_id:
+          type: integer
+          example: 20
+
+        pickup_location:
+          type: string
+          example: "Đại học Công nghiệp TP.HCM"
+
+        destination:
+          type: string
+          example: "Sân bay Tân Sơn Nhất"
+
+        status:
+          type: string
+          enum:
+            - COMPLETED
+            - CANCELLED
+            - IN_PROGRESS
+          example: COMPLETED
+
+        created_at:
+          type: string
+          format: date-time
+
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
