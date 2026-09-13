@@ -1,0 +1,189 @@
+openapi: 3.0.3
+
+info:
+  title: CAB System - Authentication API
+  description: API đăng ký và đăng nhập hệ thống CAB
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+
+tags:
+  - name: Authentication
+    description: Xác thực người dùng
+
+paths:
+
+  /auth/register/customer:
+
+    post:
+      tags:
+        - Authentication
+      summary: Đăng ký tài khoản khách hàng
+      operationId: registerCustomer
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+
+      responses:
+        '201':
+          description: Đăng ký thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+        '400':
+          description: Dữ liệu đăng ký không hợp lệ
+
+        '409':
+          description: Email hoặc số điện thoại đã tồn tại
+
+  /auth/login:
+
+    post:
+      tags:
+        - Authentication
+      summary: Đăng nhập
+      operationId: login
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+
+      responses:
+        '200':
+          description: Đăng nhập thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+        '401':
+          description: Email hoặc mật khẩu không đúng
+
+        '403':
+          description: Tài khoản bị khóa hoặc ngừng hoạt động
+
+  /auth/logout:
+
+    post:
+      tags:
+        - Authentication
+      summary: Đăng xuất
+      operationId: logout
+
+      security:
+        - bearerAuth: []
+
+      responses:
+        '204':
+          description: Đăng xuất thành công
+
+        '401':
+          description: Token không hợp lệ
+
+components:
+
+  securitySchemes:
+
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    RegisterRequest:
+      type: object
+      required:
+        - full_name
+        - phone
+        - email
+        - password
+
+      properties:
+
+        full_name:
+          type: string
+          example: Nguyen Van A
+
+        phone:
+          type: string
+          example: "0901234567"
+
+        email:
+          type: string
+          format: email
+          example: nguyenvana@gmail.com
+
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: "Password123!"
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+
+      properties:
+
+        email:
+          type: string
+          format: email
+          example: nguyenvana@gmail.com
+
+        password:
+          type: string
+          format: password
+          example: "Password123!"
+
+    AuthResponse:
+      type: object
+      properties:
+
+        access_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+
+        token_type:
+          type: string
+          example: Bearer
+
+        expires_in:
+          type: integer
+          example: 3600
+
+        user:
+          type: object
+          properties:
+
+            user_id:
+              type: integer
+              example: 1
+
+            full_name:
+              type: string
+              example: Nguyen Van A
+
+            email:
+              type: string
+              example: nguyenvana@gmail.com
+
+            role:
+              type: string
+              enum:
+                - CUSTOMER
+                - DRIVER
+                - OPERATOR
+              example: CUSTOMER
